@@ -1,0 +1,140 @@
+{
+  "companies_list": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 4144
+  },
+  "graph_snapshot": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2080
+  },
+  "graph_nodes_company": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2068
+  },
+  "graph_subgraph_co_abb": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2047
+  },
+  "reports_formats": {
+    "pass": false,
+    "stub": false,
+    "status": 500,
+    "ms": 2102
+  },
+  "entity_co_abb": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2044
+  },
+  "entity_co_abb_risk": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2064
+  },
+  "entity_sup_048_graph": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2078
+  },
+  "entity_evt_020": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2048
+  },
+  "health": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2037
+  },
+  "graph_overview": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2060
+  },
+  "analytics_summary": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2146
+  },
+  "companies_by_country": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2052
+  },
+  "companies_by_risk": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2072
+  },
+  "admin_dashboard": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2185
+  },
+  "collaboration_roles": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2043
+  },
+  "copilot_suggestions": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2027
+  },
+  "forecast_models": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2048
+  },
+  "simulation_scenario": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2054
+  },
+  "explainability_node": {
+    "pass": true,
+    "stub": false,
+    "status": 200,
+    "ms": 2074
+  },
+  "predictions_history": {
+    "pass": false,
+    "stub": true,
+    "status": 501,
+    "ms": 2039
+  },
+  "events_list": {
+    "pass": false,
+    "stub": true,
+    "status": 501,
+    "ms": 2027
+  },
+  "export_csv": {
+    "pass": false,
+    "stub": true,
+    "status": 501,
+    "ms": 2027
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "entity_results": {
+    "co-abb": {
+      "pass": false
+    },
+    "sup-048": {
+      "pass": false
+    },
+    "evt-020": {
+      "pass": true,
+      "url": "http://localhost:8000/api/v1/graph/nodes/DisruptionEvent/evt-020",
+      "ms": 2145
+    }
+  },
+  "neo4j_pass": true,
+  "neo4j_node_counts": {
+    "Supplier": 100,
+    "Product": 60,
+    "Company": 30,
+    "Warehouse": 25,
+    "Manufacturer": 20,
+    "DisruptionEvent": 20,
+    "Port": 15,
+    "Country": 12
+  },
+  "neo4j_rel_counts": {
+    "SUPPLIES_TO": 149,
+    "LOCATED_IN": 90,
+    "AFFECTS": 60,
+    "HAS_WAREHOUSE": 48,
+    "SHIPS_THROUGH": 40,
+    "OPERATES_IN": 30,
+    "SOURCES_FROM": 12
+  },
+  "neo4j_total_rels": 429,
+  "unexpected_rel_types": [],
+  "mock_flags": []
+}

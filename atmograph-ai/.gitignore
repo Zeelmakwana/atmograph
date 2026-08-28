@@ -217,4 +217,6 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-atmograph-ai/docker/.env.docker
+frontend/node_modules/
+
+docker/.env.docker
