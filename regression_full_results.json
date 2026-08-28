@@ -1,0 +1,326 @@
+{
+  "smoke_by_tag": {
+    "Administration": {
+      "pass": true,
+      "status": 200,
+      "ms": 2030,
+      "route": "/api/v1/admin/dashboard",
+      "snippet": "{\"success\":true,\"data\":{\"total_users\":0,\"active_users\":0,\"online_users\":0,\"total_orgs\":0,\"total_projects\":0,\"forecast_jobs\":0,\"simulation_jobs\":0,\"reports_generated\":0,\"api_requests_today\":0,\"storage_used_mb\":0.0,\"generated_at\":\"2026-08-10T16:41:15.354579+00:00\"},\"meta\":{\"request_id\":\"794f840f-ff83-"
+    },
+    "Analytics": {
+      "pass": true,
+      "status": 200,
+      "ms": 2121,
+      "route": "/api/v1/analytics/summary",
+      "snippet": "{\"success\":true,\"data\":{\"total_nodes\":30,\"active_events\":1,\"avg_risk_score\":0.246,\"top_risk_industry\":null,\"total_events_processed\":0},\"meta\":{\"request_id\":\"66192167-02b1-43de-b185-6483d8b202d4\",\"version\":\"1.0.0\"}}"
+    },
+    "Collaboration": {
+      "pass": true,
+      "status": 200,
+      "ms": 2036,
+      "route": "/api/v1/collaboration/roles",
+      "snippet": "{\"success\":true,\"data\":[{\"role\":\"owner\",\"description\":\"Full control \u2014 delete workspace, manage all settings\"},{\"role\":\"admin\",\"description\":\"Manage members, comments, workflows\"},{\"role\":\"analyst\",\"description\":\"Run simulations, generate forecasts, export reports\"},{\"role\":\"viewer\",\"description\":\"Re"
+    },
+    "Companies": {
+      "pass": false,
+      "status": 500,
+      "ms": 4327,
+      "route": "/api/v1/companies",
+      "snippet": "{\"success\":false,\"error\":{\"code\":\"INTERNAL_SERVER_ERROR\",\"message\":\"An unexpected error occurred. Please try again or contact support.\",\"details\":null,\"request_id\":\"\"}}"
+    },
+    "Copilot": {
+      "pass": true,
+      "status": 200,
+      "ms": 2023,
+      "route": "/api/v1/copilot/suggestions",
+      "snippet": "{\"success\":true,\"data\":[\"Which supplier has the highest risk score?\",\"What is the current supply chain health score?\",\"Show the most critical dependencies in the network.\",\"Explain how risk propagation works.\",\"Which supplier is the safest to work with?\",\"Show all HIGH and CRITICAL risk nodes.\",\"Wha"
+    },
+    "Events": {
+      "pass": false,
+      "status": 501,
+      "ms": 2085,
+      "route": "/api/v1/events",
+      "snippet": "{\"success\":false,\"error\":{\"code\":\"NOT_IMPLEMENTED\",\"message\":\"This endpoint will be available in Phase 4 (NLP Pipeline).\",\"details\":null}}"
+    },
+    "Explainability": {
+      "pass": true,
+      "status": 200,
+      "ms": 2114,
+      "route": "/api/v1/explanations/node/{node_id}",
+      "snippet": "{\"success\":true,\"data\":{\"subject_id\":\"{node_id}\",\"subject_type\":\"node\",\"summary\":\"'{node_id}' has a low risk score of 0.00. 2 risk factors were identified: Risk score is 0.00 (LOW) \u2014 within acceptable operating parameters.; Only one alternative supplier reduces resilience significantly..\",\"confidenc"
+    },
+    "Export": {
+      "pass": false,
+      "status": 501,
+      "ms": 2091,
+      "route": "/api/v1/export/csv",
+      "snippet": "{\"success\":false,\"error\":{\"code\":\"NOT_IMPLEMENTED\",\"message\":\"Export endpoints will be available in a future analytics phase.\",\"details\":null}}"
+    },
+    "Forecast": {
+      "pass": true,
+      "status": 200,
+      "ms": 2034,
+      "route": "/api/v1/forecast/models",
+      "snippet": "{\"success\":true,\"data\":[{\"name\":\"rule_engine\",\"description\":\"Domain-rule heuristic \u2014 fast, interpretable baseline\",\"is_stub\":false},{\"name\":\"moving_average\",\"description\":\"N-period moving average with trend correction\",\"is_stub\":false},{\"name\":\"exponential_smoothing\",\"description\":\"Holt double expon"
+    },
+    "Graph": {
+      "pass": false,
+      "status": 500,
+      "ms": 2176,
+      "route": "/api/v1/graph/snapshot",
+      "snippet": "{\"success\":false,\"error\":{\"code\":\"INTERNAL_SERVER_ERROR\",\"message\":\"An unexpected error occurred. Please try again or contact support.\",\"details\":null,\"request_id\":\"\"}}"
+    },
+    "Predictions": {
+      "pass": false,
+      "status": 501,
+      "ms": 2113,
+      "route": "/api/v1/predictions/history",
+      "snippet": "{\"success\":false,\"error\":{\"code\":\"NOT_IMPLEMENTED\",\"message\":\"Risk propagation and simulation endpoints will be available in Phase 5 (Rule Engine) and Phase 6 (GNN Engine).\",\"details\":null}}"
+    },
+    "Reports": {
+      "pass": false,
+      "status": 500,
+      "ms": 2131,
+      "route": "/api/v1/reports/formats",
+      "snippet": "{\"success\":false,\"error\":{\"code\":\"INTERNAL_SERVER_ERROR\",\"message\":\"An unexpected error occurred. Please try again or contact support.\",\"details\":null,\"request_id\":\"\"}}"
+    },
+    "Simulation": {
+      "pass": true,
+      "status": 200,
+      "ms": 2023,
+      "route": "/api/v1/simulation/scenario",
+      "snippet": "{\"success\":true,\"data\":[],\"meta\":{\"request_id\":\"745165d0-f2bd-478f-8fc1-299a375687f4\",\"version\":\"1.0.0\",\"total\":0}}"
+    },
+    "System": {
+      "pass": true,
+      "status": 200,
+      "ms": 2032,
+      "route": "/health",
+      "snippet": "{\"success\":true,\"data\":{\"status\":\"ok\",\"service\":\"atmograph-ai-backend\",\"version\":\"1.0.0\",\"environment\":\"development\"},\"meta\":{\"version\":\"1.0.0\"}}"
+    }
+  },
+  "module_results": {
+    "Graph Explorer": {
+      "pass": false,
+      "status": 500,
+      "ms": 2168,
+      "route": "/api/v1/graph/snapshot",
+      "snippet": "{\"success\":false,\"error\":{\"code\":\"INTERNAL_SERVER_ERROR\",\"message\":\"An unexpected error occurred. Please try again or contact support.\",\"details\":null,\"request_id\":\"\"}}"
+    },
+    "Analytics": {
+      "pass": true,
+      "status": 200,
+      "ms": 2061,
+      "route": "/api/v1/analytics/summary",
+      "snippet": "{\"success\":true,\"data\":{\"total_nodes\":30,\"active_events\":1,\"avg_risk_score\":0.246,\"top_risk_industry\":null,\"total_events_processed\":0},\"meta\":{\"request_id\":\"40a9c360-f36c-4b26-8820-3b4432dca40d\",\"version\":\"1.0.0\"}}"
+    },
+    "AI Insights": {
+      "pass": false,
+      "status": 501,
+      "ms": 2039,
+      "route": "/api/v1/predictions/history",
+      "snippet": "{\"success\":false,\"error\":{\"code\":\"NOT_IMPLEMENTED\",\"message\":\"Risk propagation and simulation endpoints will be available in Phase 5 (Rule Engine) and Phase 6 (GNN Engine).\",\"details\":null}}"
+    },
+    "Explainability": {
+      "pass": true,
+      "status": 200,
+      "ms": 2130,
+      "route": "/api/v1/explanations/node/{node_id}",
+      "snippet": "{\"success\":true,\"data\":{\"subject_id\":\"{node_id}\",\"subject_type\":\"node\",\"summary\":\"'{node_id}' has a low risk score of 0.00. 2 risk factors were identified: Risk score is 0.00 (LOW) \u2014 within acceptable operating parameters.; Only one alternative supplier reduces resilience significantly..\",\"confidence\":0.24,\"reasons\":[\"Risk score is 0.00 (LOW) \u2014 within acceptable operating parameters.\",\"Only one al"
+    },
+    "AI Copilot": {
+      "pass": true,
+      "status": 200,
+      "ms": 2044,
+      "route": "/api/v1/copilot/suggestions",
+      "snippet": "{\"success\":true,\"data\":[\"Which supplier has the highest risk score?\",\"What is the current supply chain health score?\",\"Show the most critical dependencies in the network.\",\"Explain how risk propagation works.\",\"Which supplier is the safest to work with?\",\"Show all HIGH and CRITICAL risk nodes.\",\"What is the impact of a disruption in Taiwan?\",\"Which nodes are most connected in the supply chain?\"],\""
+    },
+    "Forecast": {
+      "pass": true,
+      "status": 200,
+      "ms": 2051,
+      "route": "/api/v1/forecast/models",
+      "snippet": "{\"success\":true,\"data\":[{\"name\":\"rule_engine\",\"description\":\"Domain-rule heuristic \u2014 fast, interpretable baseline\",\"is_stub\":false},{\"name\":\"moving_average\",\"description\":\"N-period moving average with trend correction\",\"is_stub\":false},{\"name\":\"exponential_smoothing\",\"description\":\"Holt double exponential smoothing (level + trend)\",\"is_stub\":false},{\"name\":\"linear_regression\",\"description\":\"OLS li"
+    },
+    "Simulation": {
+      "pass": true,
+      "status": 200,
+      "ms": 2053,
+      "route": "/api/v1/simulation/scenario",
+      "snippet": "{\"success\":true,\"data\":[],\"meta\":{\"request_id\":\"2d855dee-d13d-4b8c-9463-9ae02e3ec3fa\",\"version\":\"1.0.0\",\"total\":0}}"
+    },
+    "Reports": {
+      "pass": false,
+      "status": 500,
+      "ms": 2072,
+      "route": "/api/v1/reports/formats",
+      "snippet": "{\"success\":false,\"error\":{\"code\":\"INTERNAL_SERVER_ERROR\",\"message\":\"An unexpected error occurred. Please try again or contact support.\",\"details\":null,\"request_id\":\"\"}}"
+    },
+    "Collaboration": {
+      "pass": true,
+      "status": 200,
+      "ms": 2040,
+      "route": "/api/v1/collaboration/roles",
+      "snippet": "{\"success\":true,\"data\":[{\"role\":\"owner\",\"description\":\"Full control \u2014 delete workspace, manage all settings\"},{\"role\":\"admin\",\"description\":\"Manage members, comments, workflows\"},{\"role\":\"analyst\",\"description\":\"Run simulations, generate forecasts, export reports\"},{\"role\":\"viewer\",\"description\":\"Read-only access to all workspace content\"}],\"meta\":{\"request_id\":\"ff3910d2-82ab-4ac0-a104-7af5ec98fc5"
+    },
+    "Administration": {
+      "pass": true,
+      "status": 200,
+      "ms": 2034,
+      "route": "/api/v1/admin/dashboard",
+      "snippet": "{\"success\":true,\"data\":{\"total_users\":0,\"active_users\":0,\"online_users\":0,\"total_orgs\":0,\"total_projects\":0,\"forecast_jobs\":0,\"simulation_jobs\":0,\"reports_generated\":0,\"api_requests_today\":0,\"storage_used_mb\":0.0,\"generated_at\":\"2026-08-10T16:42:05.372794+00:00\"},\"meta\":{\"request_id\":\"d3bda5ad-39c8-42e3-a6bc-85364571639a\",\"version\":\"1.0.0\"}}"
+    }
+  },
+  "entity_results": {
+    "co-abb": {
+      "pass": false,
+      "tried": [
+        "/api/v1/explanations/node/co-abb",
+        "/api/v1/forecast/company/co-abb",
+        "http://localhost:8000/api/graph/node/co-abb",
+        "http://localhost:8000/api/company/co-abb"
+      ]
+    },
+    "sup-048": {
+      "pass": false,
+      "tried": [
+        "/api/v1/explanations/node/sup-048",
+        "/api/v1/forecast/company/sup-048",
+        "http://localhost:8000/api/graph/node/sup-048",
+        "http://localhost:8000/api/company/sup-048"
+      ]
+    },
+    "evt-020": {
+      "pass": false,
+      "tried": [
+        "/api/v1/explanations/node/evt-020",
+        "/api/v1/forecast/company/evt-020",
+        "http://localhost:8000/api/graph/node/evt-020",
+        "http://localhost:8000/api/company/evt-020"
+      ]
+    }
+  },
+  "neo4j_counts": {
+    "/api/v1/companies/stats/by-country": {
+      "success": true,
+      "data": [
+        {
+          "country": "US",
+          "count": 9
+        },
+        {
+          "country": "DE",
+          "count": 5
+        },
+        {
+          "country": "TW",
+          "count": 3
+        },
+        {
+          "country": "KR",
+          "count": 3
+        },
+        {
+          "country": "JP",
+          "count": 3
+        },
+        {
+          "country": "CN",
+          "count": 3
+        },
+        {
+          "country": "NL",
+          "count": 2
+        },
+        {
+          "country": "SG",
+          "count": 1
+        },
+        {
+          "country": "IN",
+          "count": 1
+        }
+      ],
+      "meta": {
+        "request_id": "c1102299-01db-47fa-8f6b-fae37276ea4c",
+        "version": "1.0.0",
+        "total": 9
+      }
+    },
+    "/api/v1/companies/stats/by-risk": {
+      "success": true,
+      "data": [
+        {
+          "risk_level": "LOW",
+          "count": 22
+        },
+        {
+          "risk_level": "MEDIUM",
+          "count": 7
+        },
+        {
+          "risk_level": "HIGH",
+          "count": 1
+        }
+      ],
+      "meta": {
+        "request_id": "b225c2bd-865c-4488-855a-fd5a97edb6e3",
+        "version": "1.0.0",
+        "total": 3
+      }
+    },
+    "/api/v1/graph/overview": {
+      "success": true,
+      "data": {
+        "node_counts": {
+          "Supplier": 100,
+          "Product": 60,
+          "Company": 30,
+          "Warehouse": 25,
+          "Manufacturer": 20,
+          "DisruptionEvent": 20,
+          "Port": 15,
+          "Country": 12
+        },
+        "relationship_counts": {
+          "SUPPLIES_TO": 149,
+          "LOCATED_IN": 90,
+          "AFFECTS": 60,
+          "HAS_WAREHOUSE": 48,
+          "SHIPS_THROUGH": 40,
+          "OPERATES_IN": 30,
+          "SOURCES_FROM": 12
+        },
+        "total_nodes": 282,
+        "total_relationships": 429,
+        "density_proxy": 1.5213,
+        "avg_degree": 3.0426,
+        "largest_label": "Supplier",
+        "most_common_relationship": "SUPPLIES_TO"
+      },
+      "meta": {
+        "request_id": "8f155527-6275-40d8-b3ad-723f1ba09bd0",
+        "version": "1.0.0"
+      }
+    },
+    "/api/v1/analytics/summary": {
+      "success": true,
+      "data": {
+        "total_nodes": 30,
+        "active_events": 1,
+        "avg_risk_score": 0.246,
+        "top_risk_industry": null,
+        "total_events_processed": 0
+      },
+      "meta": {
+        "request_id": "bfe99f45-491b-4f5b-a73c-9563074eab71",
+        "version": "1.0.0"
+      }
+    }
+  },
+  "perf_pass": true,
+  "total_routes": 145,
+  "path_prefixes": [
+    "/api/v1"
+  ]
+}

@@ -1,0 +1,8 @@
+Invoke-Neo4j : Unable to determine the path to java.exe
+At C:\Users\ADMIN\.Neo4jDesktop2\Data\dbmss\dbms-28efe7a0-87fa-4760-9a70-b18369fe254f\bin\neo4j
+.ps1:9 char:7
++ Exit (Invoke-Neo4j -Verbose:$Arguments.Verbose -CommandArgs $Argument ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException
+    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,Invoke-Neo4j
+ 

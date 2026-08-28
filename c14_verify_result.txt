@@ -1,0 +1,65 @@
+{
+  "typescript": {
+    "pass": false,
+    "new_errors": [
+      "src/pages/Explainability/components/NodeReasonTree.tsx(8,3): error TS6133: 'ShieldAlert' is declared but its value is never read.\r",
+      "src/pages/Explainability/components/NodeReasonTree.tsx(8,16): error TS6133: 'AlertCircle' is declared but its value is never read.\r",
+      "src/pages/Explainability/components/NodeReasonTree.tsx(8,29): error TS6133: 'Info' is declared but its value is never read.\r",
+      "src/pages/Explainability/components/PropagationExplanation.tsx(6,21): error TS6133: 'AlertTriangle' is declared but its value is never read.\r",
+      "src/pages/Explainability/components/PropagationExplanation.tsx(54,21): error TS6133: 'level' is declared but its value is never read.\r",
+      "src/pages/Explainability/components/RiskBreakdownChart.tsx(18,7): error TS6133: 'BASELINE_KEYS' is declared but its value is never read.\r",
+      "src/pages/Explainability/components/RiskBreakdownChart.tsx(65,36): error TS6133: 'i' is declared but its value is never read.\r",
+      "src/pages/Explainability/index.tsx(20,38): error TS6133: 'RefreshCw' is declared but its value is never read.\r",
+      "src/pages/Explainability/index.tsx(21,6): error TS6133: 'ChevronDown' is declared but its value is never read.\r",
+      "src/pages/Explainability/index.tsx(429,16): error TS18046: 'store' is of type 'unknown'.\r",
+      "src/pages/Explainability/index.tsx(431,8): error TS18046: 'store' is of type 'unknown'.\r",
+      "src/pages/Explainability/index.tsx(434,21): error TS18046: 'store' is of type 'unknown'.\r",
+      "src/pages/Explainability/index.tsx(436,22): error TS18046: 'store' is of type 'unknown'.\r",
+      "src/pages/Explainability/index.tsx(438,12): error TS18046: 'store' is of type 'unknown'.\r",
+      "src/pages/Explainability/index.tsx(441,12): error TS18046: 'store' is of type 'unknown'.\r",
+      "src/pages/Explainability/index.tsx(441,58): error TS18046: 'store' is of type 'unknown'.\r",
+      "src/pages/Explainability/index.tsx(444,8): error TS18046: 'store' is of type 'unknown'.\r",
+      "src/pages/Explainability/index.tsx(446,20): error TS18046: 'store' is of type 'unknown'.\r"
+    ],
+    "pre_existing": [
+      "src/components/copilot/CopilotChat.tsx(55,10): error TS6133: 'MarkdownLine' is declared but its value is never read.\r",
+      "src/services/analyticsApi.ts(85,3): error TS6133: 'periodDays' is declared but its value is never read.\r",
+      "src/services/predictionApi.ts(17,11): error TS6196: 'BackendEnvelope' is declared but never used."
+    ]
+  },
+  "python_syntax": {
+    "atmograph-ai/backend/app/ai/explanation_engine.py": "PASS",
+    "atmograph-ai/backend/app/services/explanation_service.py": "PASS",
+    "atmograph-ai/backend/app/api/v1/explanations.py": "PASS"
+  },
+  "router": {
+    "import_ok": true,
+    "include_ok": true
+  },
+  "dependencies": {
+    "get_explanation_service": true,
+    "ExplanationService_import": true
+  },
+  "frontend_routing": {
+    "lazy_import": true,
+    "route": true
+  },
+  "sidebar": {
+    "lightbulb_import": true,
+    "nav_item": true
+  },
+  "endpoints": {
+    "count": 4,
+    "expected": 4
+  },
+  "openapi_tag": {
+    "has_tag": true
+  },
+  "zero_unrelated": {
+    "predictions.py": "UNCHANGED",
+    "simulation.py": "UNCHANGED",
+    "index.tsx": "UNCHANGED",
+    "graphStore.ts": "UNCHANGED",
+    "predictionStore.ts": "UNCHANGED"
+  }
+}

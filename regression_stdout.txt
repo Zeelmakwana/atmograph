@@ -1,0 +1,54 @@
+[health] PASS HTTP 200 2053ms
+[docs]   PASS HTTP 200 2033ms
+  [FAIL] graph_nodes               HTTP 404 2022ms
+  [FAIL] graph_edges               HTTP 404 2059ms
+  [FAIL] graph_search              HTTP 404 2074ms
+  [FAIL] analytics_ovr             HTTP 404 2062ms
+  [FAIL] analytics_risk            HTTP 404 2041ms
+  [FAIL] predictions               HTTP 404 2062ms
+  [FAIL] copilot_health            HTTP 404 2023ms
+  [FAIL] events                    HTTP 404 2045ms
+  [FAIL] company_list              HTTP 404 2049ms
+  [FAIL] export_formats            HTTP 404 2053ms
+  [FAIL] v1_forecast               HTTP 404 2018ms
+  [FAIL] v1_simulation             HTTP 404 2027ms
+  [FAIL] v1_reports                HTTP 404 2024ms
+  [FAIL] v1_collab                 HTTP 404 2028ms
+  [FAIL] v1_admin                  HTTP 404 2035ms
+  [FAIL] v1_explanations           HTTP 404 2028ms
+  [FAIL] v1_sim_scenarios          HTTP 404 2040ms
+
+[Entity Checks]
+  [FAIL] co-abb       HTTP 404 2041ms  {"detail":"Not Found"}
+  [FAIL] sup-048      HTTP 404 2066ms  {"detail":"Not Found"}
+  [FAIL] evt-020      HTTP 404 2062ms  {"detail":"Not Found"}
+
+[Neo4j Integrity]
+  [INFO] /api/graph/stats HTTP 404 - trying /api/analytics/overview
+  [FAIL] /api/analytics/overview HTTP 404 2036ms
+         {"detail":"Not Found"}
+
+[Relationship Types]
+  [INFO] relationship-types returned 404, using /api/graph/edges snippet
+         {"detail":"Not Found"}
+
+[Mock Data Check]
+  [WARN] /api/graph/nodes returned 404
+
+[Response Time Sanity]
+  [PASS] health                    2032ms
+  [FAIL] graph_nodes               2052ms
+  [FAIL] analytics_ovr             2065ms
+  [FAIL] predictions               2038ms
+  [FAIL] v1_forecast               2036ms
+
+[SAVED] Full results -> c:\Users\ADMIN\OneDrive\Desktop\AtmoGraph AI\regression_full_results.json
+
+=== REGRESSION SUMMARY ===
+Health:        PASS
+Docs/OpenAPI:  PASS
+API Smoke:     PARTIAL/FAIL
+Entities:      PARTIAL/FAIL
+Mock Check:    SEE DETAILS
+Perf Sanity:   PARTIAL/FAIL
+EXIT_CODE=0 
