@@ -252,3 +252,6 @@ data/imports/_validation_*
 
 # Office temporary lock files
 ~$*.pptx
+
+# Local SQLite database
+backend/atmograph.db
