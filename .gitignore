@@ -216,3 +216,39 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Environment
+.env
+
+# ML
+ml/data/raw/
+ml/data/processed/
+ml/checkpoints/
+
+# Node
+node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# AtmoGraph temporary and backup files
+*.bak
+*.backup
+*.before_*
+*.dump
+frontend/App_current_dump.txt
+data/imports/_import_*
+data/imports/_validation_*
+
+# Office temporary lock files
+~$*.pptx
