@@ -1,0 +1,131 @@
+====================================================================
+          ATMOGRAPH - HOW TO RUN ON A NEW LAPTOP (SETUP GUIDE)
+====================================================================
+
+If you are setting up and running this project on a new laptop,
+simply follow the steps below in order.
+
+--------------------------------------------------------------------
+STEP 0: PREREQUISITES (INSTALL THESE 3 SOFTWARES FIRST)
+--------------------------------------------------------------------
+1. Python (Version 3.11 or 3.12):
+   - Link: https://www.python.org/downloads/
+   - CRITICAL: On the first installer screen, make sure to CHECK
+     the box: "Add Python to PATH"!
+
+2. Node.js (LTS Version):
+   - Link: https://nodejs.org/
+   - Run the installer and click "Next -> Next -> Finish".
+
+3. Docker Desktop (Required for Neo4j Database):
+   - Link: https://www.docker.com/products/docker-desktop/
+   - Install Docker Desktop, restart laptop if prompted, and open it.
+
+--------------------------------------------------------------------
+STEP 1: START THE NEO4J DATABASE (DOCKER)
+--------------------------------------------------------------------
+Make sure Docker Desktop is open and running in the background.
+
+Open a terminal in the root "atmograph" folder and run this single command:
+
+   docker compose up -d
+
+(OR if you prefer running it directly without compose):
+   docker run -d --name atmograph_neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/password neo4j:latest
+
+--> Your Neo4j Database is now UP and RUNNING!
+--> Optional check in browser: http://localhost:7474
+    (Username: neo4j | Password: password)
+
+--------------------------------------------------------------------
+STEP 2: RUN BACKEND (Python FastAPI Server)
+--------------------------------------------------------------------
+Open a terminal window (PowerShell or CMD) in the project folder and run:
+
+1. Navigate to backend directory:
+   cd backend
+
+2. Create virtual environment:
+   python -m venv .venv
+
+3. Activate the virtual environment:
+   # In Windows PowerShell:
+   .\.venv\Scripts\Activate.ps1
+
+   # (If PowerShell gives an execution policy error, run in CMD instead):
+   .venv\Scripts\activate.bat
+
+4. Setup environment file:
+   # In PowerShell / CMD:
+   copy .env.example .env
+
+5. Install all backend dependencies:
+   pip install -r requirements.txt
+
+6. Download the NLP English model:
+   python -m spacy download en_core_web_sm
+
+7. Create database tables (One-time setup):
+   python -m app.core.init_db
+
+8. Load sample business data:
+   python -m app.core.seed
+
+9. Start the Backend API Server:
+   uvicorn app.main:app --reload --port 8000
+
+--> Backend is now RUNNING on http://127.0.0.1:8000
+--> Leave this terminal window running.
+
+--------------------------------------------------------------------
+STEP 3: RUN FRONTEND (React Website)
+--------------------------------------------------------------------
+Open a SECOND terminal window (keep the backend terminal running):
+
+1. Navigate to frontend directory:
+   cd frontend
+
+2. Setup environment file:
+   copy .env.example .env
+
+3. Install packages (Only needed the first time):
+   npm install
+
+4. Start the Frontend Website:
+   npm run dev
+
+--> The terminal will display: http://localhost:5173
+--> Open this URL in your web browser (Chrome / Edge):
+    http://localhost:5173
+
+--------------------------------------------------------------------
+STEP 4: REGISTER / LOGIN & LOAD DEMO DATA
+--------------------------------------------------------------------
+1. When http://localhost:5173 opens in your browser, click "Register".
+2. Enter any Email and Password of your choice.
+3. In "Company Name", type either:
+   - "Mohilya Couture"  (Automatically loads Surat textile dataset)
+   OR
+   - "AdilQadri Perfumes" (Automatically loads perfumes/attar dataset)
+4. Click "Create Account".
+5. The full dashboard, Interactive Graph, Simulator, and Radar will open!
+
+--------------------------------------------------------------------
+STEP 5: QUICK START (FOR EVERYDAY USE)
+--------------------------------------------------------------------
+Once everything is installed, starting the project on any day takes 
+just 3 quick steps:
+
+1. Make sure Docker Desktop is open (Neo4j runs automatically, or run `docker compose up -d`).
+
+2. Terminal 1 (Backend):
+   cd backend
+   .\.venv\Scripts\activate
+   uvicorn app.main:app --reload --port 8000
+
+3. Terminal 2 (Frontend):
+   cd frontend
+   npm run dev
+
+4. Open Browser: http://localhost:5173
+====================================================================
