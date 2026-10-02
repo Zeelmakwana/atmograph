@@ -115,6 +115,16 @@ class SupplierFailureRequest(BaseModel):
 # ============================================================
 
 
+def _resolve_user_id(current_user: User | None, db: Session) -> int | None:
+    if current_user and current_user.id:
+        return current_user.id
+    from app.models.business_supply_chain import Company
+    latest_company = db.query(Company).order_by(Company.id.desc()).first()
+    if latest_company and latest_company.user_id:
+        return latest_company.user_id
+    return None
+
+
 @router.post("/simulate")
 def simulate_supplier_failure(
     payload: SupplierFailureRequest,
@@ -135,7 +145,7 @@ def simulate_supplier_failure(
         effective route time
     """
 
-    user_id = current_user.id if current_user else None
+    user_id = _resolve_user_id(current_user, db)
     simulator = DisruptionSimulator(db, user_id=user_id)
 
     result = simulator.simulate_supplier_failure(
@@ -171,10 +181,12 @@ def supply_chain_suppliers(
         BusinessSupplier,
     )
 
-    user_id = current_user.id if current_user else None
+    user_id = _resolve_user_id(current_user, db)
     query = db.query(BusinessSupplier)
     if user_id is not None:
         query = query.filter(BusinessSupplier.user_id == user_id)
+    else:
+        query = query.filter(BusinessSupplier.id == -1)
 
     suppliers = (
         query.order_by(
@@ -212,12 +224,14 @@ def supply_chain_catalog(
         Company,
     )
 
-    user_id = current_user.id if current_user else None
+    user_id = _resolve_user_id(current_user, db)
 
     def _query(model):
         q = db.query(model)
         if user_id is not None:
             q = q.filter(model.user_id == user_id)
+        else:
+            q = q.filter(model.id == -1)
         return q
 
     suppliers = (

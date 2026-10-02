@@ -54,7 +54,6 @@ export default function DashboardOverview({
   const [simulation, setSimulation] = useState<SupplierFailureSimulation | null>(null);
   const [loading, setLoading] = useState(true);
   const [simulating, setSimulating] = useState(false);
-  const [selectedIndustry, setSelectedIndustry] = useState<string>("textiles");
 
   // Load initial catalog and suppliers
   useEffect(() => {
@@ -66,13 +65,28 @@ export default function DashboardOverview({
           getSupplyChainSuppliers(),
         ]);
 
-        if (catData.status === "fulfilled") setCatalog(catData.value);
-        if (supData.status === "fulfilled") {
-          const sups = supData.value.suppliers ?? [];
-          setSuppliers(sups);
-          if (sups.length > 0) {
-            setSelectedSupplierId(sups[0].supplier_id);
+        let supsList: SupplyChainSupplier[] = [];
+        if (catData.status === "fulfilled") {
+          setCatalog(catData.value);
+          if (catData.value.suppliers?.length) {
+            supsList = catData.value.suppliers;
           }
+        }
+
+        if (!supsList.length && supData.status === "fulfilled") {
+          supsList = supData.value.suppliers ?? [];
+        }
+
+        const seen = new Set<string>();
+        const sups = supsList.filter((s) => {
+          if (seen.has(s.supplier_id)) return false;
+          seen.add(s.supplier_id);
+          return true;
+        });
+
+        setSuppliers(sups);
+        if (sups.length > 0) {
+          setSelectedSupplierId(sups[0].supplier_id);
         }
 
         // Check for last simulation in localStorage safely
@@ -99,6 +113,15 @@ export default function DashboardOverview({
     }
 
     void loadData();
+
+    const handleWsChange = () => {
+      void loadData();
+    };
+
+    window.addEventListener("atmograph:workspace-changed", handleWsChange);
+    return () => {
+      window.removeEventListener("atmograph:workspace-changed", handleWsChange);
+    };
   }, []);
 
   // Run simulation on selected supplier
@@ -141,55 +164,31 @@ export default function DashboardOverview({
   return (
     <div className="page-container" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       {/* 1. Header Banner & Guided Explainer */}
-      <div className="page-header-row" style={{ alignItems: "flex-start" }}>
+      <div className="page-header-row" style={{ alignItems: "center", justifyContent: "space-between" }}>
         <div className="page-headline">
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-            <span className="eyebrow-tag" style={{ background: "rgba(232, 168, 56, 0.15)", color: "#e8a838" }}>
-              SUPPLY CHAIN RIPPLE PREDICTOR
+            <span className="eyebrow-tag" style={{ background: "#eff6ff", color: "#2563eb", padding: "3px 10px", borderRadius: "6px", border: "1px solid #bfdbfe" }}>
+              DISRUPTION CHECKER
             </span>
-            <span style={{ fontSize: "11px", color: "#8e8e96" }}>· 3-Step Guided Workflow</span>
+            <span style={{ fontSize: "12px", color: "#64748b" }}>· 3 Simple Steps</span>
           </div>
-          <h2 style={{ fontSize: "24px", fontWeight: 700, margin: "0 0 6px" }}>
-            Test How Any Disruption Impacts Your Business
+          <h2 style={{ fontSize: "24px", fontWeight: 700, margin: "0 0 6px", color: "#0f172a" }}>
+            See What Happens When a Supplier is Delayed
           </h2>
-          <p style={{ maxWidth: "780px", color: "#9ca3af", fontSize: "13px", lineHeight: "1.5" }}>
-            Select or upload your business structure, pick an unexpected supplier or port disruption, and watch AtmoGraph
-            calculate your <strong>inventory runway, factory stoppage risk, and recommended decisions</strong> in real time.
+          <p style={{ maxWidth: "780px", color: "#475569", fontSize: "13.5px", lineHeight: "1.5", margin: 0 }}>
+            Pick a supplier below. We will calculate whether your <strong>backup stock is enough</strong>,
+            if your <strong>factory will stop</strong>, and <strong>what actions you should take</strong>.
           </p>
         </div>
 
-        {/* Industry Switcher & Quick Upload */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "4px 8px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <span style={{ fontSize: "11px", color: "#8e8e96", fontWeight: 600 }}>BUSINESS PRESET:</span>
-            <select
-              value={selectedIndustry}
-              onChange={(e) => setSelectedIndustry(e.target.value)}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "#e8a838",
-                fontSize: "12px",
-                fontWeight: 600,
-                cursor: "pointer",
-                outline: "none",
-              }}
-            >
-              <option value="textiles" style={{ background: "#18181b", color: "#fff" }}>👗 Ethnic Wear & Textiles (Surat Hub)</option>
-              <option value="electronics" style={{ background: "#18181b", color: "#fff" }}>📱 Consumer Electronics & Chips</option>
-              <option value="automotive" style={{ background: "#18181b", color: "#fff" }}>🚗 Automotive & EV Battery</option>
-            </select>
-          </div>
-
-          <button
-            className="secondary-button"
-            style={{ fontSize: "12px", padding: "6px 12px" }}
-            onClick={() => onNavigate("catalog")}
-          >
-            <FileSpreadsheet size={14} />
-            Upload My Excel/JSON
-          </button>
-        </div>
+        <button
+          className="secondary-button"
+          style={{ fontSize: "13px", padding: "8px 16px", background: "#ffffff", border: "1px solid #cbd5e1", color: "#0f172a", display: "inline-flex", alignItems: "center", gap: "7px" }}
+          onClick={() => onNavigate("catalog")}
+        >
+          <FileSpreadsheet size={15} color="#2563eb" />
+          Upload My Excel File
+        </button>
       </div>
 
       {/* 2. Visual 3-Step Guided Stepper */}
@@ -198,78 +197,85 @@ export default function DashboardOverview({
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           gap: "12px",
-          background: "rgba(255, 255, 255, 0.02)",
-          border: "1px solid rgba(255, 255, 255, 0.06)",
+          background: "#ffffff",
+          border: "1px solid #e2e8f0",
           borderRadius: "12px",
-          padding: "14px 18px",
+          padding: "16px 20px",
+          boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div
             style={{
-              width: "28px",
-              height: "28px",
+              width: "30px",
+              height: "30px",
               borderRadius: "50%",
-              background: "rgba(232, 168, 56, 0.2)",
-              color: "#e8a838",
+              background: "#eff6ff",
+              color: "#2563eb",
+              border: "1px solid #bfdbfe",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               fontWeight: 700,
-              fontSize: "12px",
+              fontSize: "13px",
+              flexShrink: 0,
             }}
           >
             1
           </div>
           <div>
-            <div style={{ fontSize: "12px", fontWeight: 600, color: "#ececef" }}>Pick / Upload Business</div>
-            <div style={{ fontSize: "11px", color: "#8e8e96" }}>{totalSuppliers} Suppliers · {totalProducts} Finished Products</div>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "#0f172a" }}>Step 1: Check Suppliers</div>
+            <div style={{ fontSize: "11.5px", color: "#64748b" }}>{totalSuppliers} Suppliers · {totalProducts} Products</div>
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div
             style={{
-              width: "28px",
-              height: "28px",
+              width: "30px",
+              height: "30px",
               borderRadius: "50%",
-              background: "rgba(239, 68, 68, 0.2)",
-              color: "#f87171",
+              background: "#fee2e2",
+              color: "#dc2626",
+              border: "1px solid #fecaca",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               fontWeight: 700,
-              fontSize: "12px",
+              fontSize: "13px",
+              flexShrink: 0,
             }}
           >
             2
           </div>
           <div>
-            <div style={{ fontSize: "12px", fontWeight: 600, color: "#ececef" }}>Select Outage Event</div>
-            <div style={{ fontSize: "11px", color: "#8e8e96" }}>Choose supplier shutdown or delay</div>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "#0f172a" }}>Step 2: Pick a Supplier</div>
+            <div style={{ fontSize: "11.5px", color: "#64748b" }}>Choose who is delayed or shut down</div>
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div
             style={{
-              width: "28px",
-              height: "28px",
+              width: "30px",
+              height: "30px",
               borderRadius: "50%",
-              background: "rgba(61, 214, 140, 0.2)",
-              color: "#3dd68c",
+              background: "#f0fdf4",
+              color: "#16a34a",
+              border: "1px solid #bbf7d0",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               fontWeight: 700,
-              fontSize: "12px",
+              fontSize: "13px",
+              flexShrink: 0,
             }}
           >
             3
           </div>
           <div>
-            <div style={{ fontSize: "12px", fontWeight: 600, color: "#ececef" }}>See Ripple & Decision</div>
-            <div style={{ fontSize: "11px", color: "#8e8e96" }}>Graph cascade + Mitigation advice</div>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "#0f172a" }}>Step 3: See What Happens</div>
+            <div style={{ fontSize: "11.5px", color: "#64748b" }}>See factory status & simple advice</div>
           </div>
         </div>
       </div>
@@ -278,73 +284,47 @@ export default function DashboardOverview({
       <div
         className="modern-card"
         style={{
-          background: "linear-gradient(180deg, rgba(30, 30, 36, 0.7) 0%, rgba(20, 20, 24, 0.9) 100%)",
-          border: "1px solid rgba(232, 168, 56, 0.2)",
-          padding: "20px",
+          background: "#ffffff",
+          border: "1px solid #cbd5e1",
+          padding: "22px",
+          boxShadow: "0 2px 6px rgba(15, 23, 42, 0.05)",
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div style={{ width: 34, height: 34, borderRadius: "8px", background: "rgba(239, 68, 68, 0.15)", color: "#f87171", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Zap size={18} />
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: 38, height: 38, borderRadius: "10px", background: "#fee2e2", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Zap size={20} />
             </div>
             <div>
-              <strong style={{ fontSize: "15px", color: "#ececef" }}>Step 2: Trigger Disruption Simulation</strong>
-              <div style={{ fontSize: "12px", color: "#8e8e96" }}>Select which supplier is affected to calculate ripple effects</div>
+              <strong style={{ fontSize: "15px", color: "#0f172a" }}>Step 2: Pick a Supplier to Test</strong>
+              <div style={{ fontSize: "12.5px", color: "#64748b" }}>Select any supplier and click 'Check Impact Now' to see what happens</div>
             </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "12px", color: "#8e8e96" }}>Outage Duration:</span>
-            {[
-              { label: "3 Days", days: 3 },
-              { label: "7 Days", days: 7 },
-              { label: "14 Days", days: 14 },
-              { label: "30 Days", days: 30 },
-            ].map((item) => (
-              <button
-                key={item.days}
-                onClick={() => setOutageDuration(item.days)}
-                style={{
-                  background: outageDuration === item.days ? "rgba(232, 168, 56, 0.2)" : "rgba(255, 255, 255, 0.05)",
-                  color: outageDuration === item.days ? "#e8a838" : "#8e8e96",
-                  border: `1px solid ${outageDuration === item.days ? "#e8a838" : "rgba(255, 255, 255, 0.1)"}`,
-                  borderRadius: "6px",
-                  padding: "4px 10px",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                {item.label}
-              </button>
-            ))}
           </div>
         </div>
 
         {/* Input Bar: Supplier Dropdown + Run Button */}
-        <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ flex: "1", minWidth: "260px" }}>
-            <label style={{ display: "block", fontSize: "11px", color: "#8e8e96", marginBottom: "6px", fontWeight: 600 }}>
-              SELECT DISRUPTED SUPPLIER NODE:
+            <label style={{ display: "block", fontSize: "12px", color: "#475569", marginBottom: "6px", fontWeight: 600 }}>
+              CHOOSE SUPPLIER TO TEST:
             </label>
             <select
               value={selectedSupplierId}
               onChange={(e) => setSelectedSupplierId(e.target.value)}
               style={{
                 width: "100%",
-                background: "rgba(10, 10, 14, 0.8)",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
+                background: "#ffffff",
+                border: "1px solid #cbd5e1",
                 borderRadius: "8px",
                 padding: "10px 14px",
-                color: "#ececef",
-                fontSize: "13px",
+                color: "#0f172a",
+                fontSize: "13.5px",
                 fontWeight: 600,
                 outline: "none",
               }}
             >
               {suppliers.map((s) => (
-                <option key={s.supplier_id} value={s.supplier_id} style={{ background: "#18181b", color: "#fff" }}>
+                <option key={s.supplier_id} value={s.supplier_id}>
                   {s.name} ({s.city ?? "Surat"}) · ID: {s.supplier_id}
                 </option>
               ))}
@@ -355,17 +335,17 @@ export default function DashboardOverview({
             <button
               className="primary-action-btn"
               style={{
-                padding: "10px 24px",
-                fontSize: "13px",
-                fontWeight: 700,
-                background: "linear-gradient(135deg, #e8a838 0%, #d48b16 100%)",
-                boxShadow: "0 4px 14px rgba(232, 168, 56, 0.35)",
+                padding: "11px 26px",
+                fontSize: "13.5px",
+                fontWeight: 600,
+                background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                boxShadow: "0 2px 8px rgba(37, 99, 235, 0.3)",
               }}
               onClick={() => handleRunSimulation()}
               disabled={simulating}
             >
               <Zap size={16} className={simulating ? "sc-spin" : ""} />
-              {simulating ? "Calculating Ripple..." : "Run Ripple Prediction ⚡"}
+              {simulating ? "Checking Impact..." : "Check Impact Now ⚡"}
             </button>
           </div>
         </div>
@@ -375,98 +355,103 @@ export default function DashboardOverview({
       {simulation ? (
         <div
           style={{
-            background: isStoppage ? "rgba(239, 68, 68, 0.06)" : "rgba(61, 214, 140, 0.06)",
-            border: `1px solid ${isStoppage ? "rgba(239, 68, 68, 0.25)" : "rgba(61, 214, 140, 0.25)"}`,
+            background: isStoppage ? "#fff5f5" : "#f0fdf4",
+            border: `1px solid ${isStoppage ? "#fecaca" : "#bbf7d0"}`,
             borderRadius: "14px",
-            padding: "20px",
+            padding: "22px",
             display: "flex",
             flexDirection: "column",
-            gap: "16px",
+            gap: "18px",
+            boxShadow: "0 2px 8px rgba(15, 23, 42, 0.04)",
           }}
         >
           {/* Executive Verdict Banner */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px" }}>
-            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
               {isStoppage ? (
-                <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(239, 68, 68, 0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "#f87171" }}>
-                  <AlertTriangle size={22} />
+                <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#fee2e2", display: "flex", alignItems: "center", justifyContent: "center", color: "#dc2626", flexShrink: 0 }}>
+                  <AlertTriangle size={24} />
                 </div>
               ) : (
-                <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(61, 214, 140, 0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "#3dd68c" }}>
-                  <CheckCircle2 size={22} />
+                <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", color: "#16a34a", flexShrink: 0 }}>
+                  <CheckCircle2 size={24} />
                 </div>
               )}
               <div>
-                <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: isStoppage ? "#f87171" : "#3dd68c" }}>
-                  STEP 3: EXECUTIVE DECISION VERDICT
+                <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", color: isStoppage ? "#dc2626" : "#16a34a" }}>
+                  STEP 3: RESULT & WHAT TO DO
                 </span>
-                <h3 style={{ margin: "2px 0 0", fontSize: "18px", color: "#ececef" }}>
+                <h3 style={{ margin: "2px 0 0", fontSize: "19px", fontWeight: 700, color: "#0f172a" }}>
                   {isStoppage
-                    ? `CRITICAL FACTORY HALT PREDICTED (${simulation?.supplier?.name ?? "Selected Supplier"})`
-                    : `PRODUCTION SAFE · BUFFER ABSORBS DISRUPTION (${simulation?.supplier?.name ?? "Selected Supplier"})`}
+                    ? `Warning: Factory Will Stop! (${simulation?.supplier?.name ?? "Selected Supplier"})`
+                    : `Safe: Backup Stock is Enough! (${simulation?.supplier?.name ?? "Selected Supplier"})`}
                 </h3>
-                <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#9ca3af" }}>
+                <p style={{ margin: "4px 0 0", fontSize: "13.5px", color: "#475569" }}>
                   {isStoppage
-                    ? `Current stock buffer will run out in ${safeNumber(simulation?.summary?.max_delay_days, 3.3).toFixed(1)} days. Net deficit of ${formatSafe(simulation?.summary?.net_shortage, 1000)} units will halt assembly.`
-                    : `Existing warehouse stock protects manufacturing for ${safeNumber(simulation?.summary?.max_delay_days, 12).toFixed(1)} days while secondary sourcing activates.`}
+                    ? `Your current backup stock will run out in ${safeNumber(simulation?.summary?.max_delay_days, 3.3).toFixed(1)} days. You are short ${formatSafe(simulation?.summary?.net_shortage, 1000)} items which will stop production.`
+                    : `Your current warehouse stock protects manufacturing for ${safeNumber(simulation?.summary?.max_delay_days, 12).toFixed(1)} days while other suppliers help.`}
                 </p>
               </div>
             </div>
 
             <button
               className="secondary-button"
-              style={{ padding: "6px 14px", fontSize: "12px" }}
+              style={{ padding: "8px 16px", fontSize: "12.5px" }}
               onClick={() => onNavigate("simulator")}
             >
-              Open Full Simulator Studio <ArrowRight size={13} />
+              Open Full Simulator <ArrowRight size={13} />
             </button>
           </div>
 
           {/* 4 Clear Impact Metrics */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
-            <div className="metric-box" style={{ background: "rgba(0,0,0,0.2)" }}>
+            <div className="metric-box" style={{ background: "#ffffff", border: "1px solid #e2e8f0" }}>
               <div className="metric-info">
-                <span className="metric-label">STOCK BUFFER RUNWAY</span>
-                <span className="metric-value" style={{ color: isStoppage ? "#f87171" : "#3dd68c" }}>
+                <span className="metric-label">DAYS OF BACKUP STOCK</span>
+                <span className="metric-value" style={{ color: isStoppage ? "#dc2626" : "#16a34a" }}>
                   {safeNumber(simulation?.summary?.max_delay_days, 3.3).toFixed(1)} Days
                 </span>
-                <span style={{ fontSize: "11px", color: "#8e8e96" }}>Time until lines stop</span>
+                <span style={{ fontSize: "11.5px", color: "#64748b" }}>Days before stock runs out</span>
               </div>
-              <div className="metric-icon-wrap" style={{ background: "rgba(245, 158, 11, 0.1)", color: "#fbbf24" }}>
-                <Clock size={16} />
-              </div>
-            </div>
-
-            <div className="metric-box" style={{ background: "rgba(0,0,0,0.2)" }}>
-              <div className="metric-info">
-                <span className="metric-label">MATERIAL DEFICIT</span>
-                <span className="metric-value">{formatSafe(simulation?.summary?.net_shortage, 1000)}</span>
-                <span style={{ fontSize: "11px", color: "#8e8e96" }}>Uncovered units</span>
-              </div>
-              <div className="metric-icon-wrap" style={{ background: "rgba(239, 68, 68, 0.1)", color: "#f87171" }}>
-                <TrendingDown size={16} />
+              <div className="metric-icon-wrap" style={{ background: "#fef3c7", color: "#d97706", border: "1px solid #fde68a" }}>
+                <Clock size={18} />
               </div>
             </div>
 
-            <div className="metric-box" style={{ background: "rgba(0,0,0,0.2)" }}>
+            <div className="metric-box" style={{ background: "#ffffff", border: "1px solid #e2e8f0" }}>
               <div className="metric-info">
-                <span className="metric-label">PRODUCTS AT RISK</span>
-                <span className="metric-value">{safeNumber(simulation?.summary?.affected_products, 8)} Lines</span>
-                <span style={{ fontSize: "11px", color: "#8e8e96" }}>Kurtas, Lehengas & Gowns</span>
+                <span className="metric-label">MISSING ITEMS</span>
+                <span className="metric-value" style={{ color: isStoppage ? "#dc2626" : "#0f172a" }}>
+                  {formatSafe(simulation?.summary?.net_shortage, 1000)}
+                </span>
+                <span style={{ fontSize: "11.5px", color: "#64748b" }}>Items you need to replace</span>
               </div>
-              <div className="metric-icon-wrap" style={{ background: "rgba(155, 140, 255, 0.1)", color: "#9b8cff" }}>
-                <Package size={16} />
+              <div className="metric-icon-wrap" style={{ background: "#fee2e2", color: "#dc2626", border: "1px solid #fecaca" }}>
+                <TrendingDown size={18} />
               </div>
             </div>
 
-            <div className="metric-box" style={{ background: "rgba(0,0,0,0.2)" }}>
+            <div className="metric-box" style={{ background: "#ffffff", border: "1px solid #e2e8f0" }}>
               <div className="metric-info">
-                <span className="metric-label">BACKUP RECOVERY</span>
-                <span className="metric-value">{formatSafe(simulation?.summary?.alternative_recovery, 0)}</span>
-                <span style={{ fontSize: "11px", color: "#34d399" }}>Units from secondary suppliers</span>
+                <span className="metric-label">PRODUCTS IMPACTED</span>
+                <span className="metric-value">{safeNumber(simulation?.summary?.affected_products, 8)} Types</span>
+                <span style={{ fontSize: "11.5px", color: "#64748b" }}>Products that need this part</span>
               </div>
-              <div className="metric-icon-wrap" style={{ background: "rgba(16, 185, 129, 0.1)", color: "#34d399" }}>
-                <CheckCircle2 size={16} />
+              <div className="metric-icon-wrap" style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe" }}>
+                <Package size={18} />
+              </div>
+            </div>
+
+            <div className="metric-box" style={{ background: "#ffffff", border: "1px solid #e2e8f0" }}>
+              <div className="metric-info">
+                <span className="metric-label">BACKUP SUPPLIER CAPACITY</span>
+                <span className="metric-value" style={{ color: "#16a34a" }}>
+                  {formatSafe(simulation?.summary?.alternative_recovery, 0)}
+                </span>
+                <span style={{ fontSize: "11.5px", color: "#16a34a" }}>Units other suppliers can ship</span>
+              </div>
+              <div className="metric-icon-wrap" style={{ background: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0" }}>
+                <CheckCircle2 size={18} />
               </div>
             </div>
           </div>
@@ -474,25 +459,25 @@ export default function DashboardOverview({
           {/* Actionable Executive Recommendations */}
           <div
             style={{
-              background: "rgba(0, 0, 0, 0.25)",
-              border: "1px solid rgba(255, 255, 255, 0.07)",
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
               borderRadius: "10px",
-              padding: "14px 18px",
+              padding: "16px 20px",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-              <Info size={15} color="#e8a838" />
-              <strong style={{ fontSize: "13px", color: "#ececef" }}>Recommended Mitigation Actions for Business Owner:</strong>
+              <Info size={16} color="#2563eb" />
+              <strong style={{ fontSize: "14px", color: "#0f172a" }}>Simple Steps to Take Now:</strong>
             </div>
-            <div style={{ display: "grid", gap: "6px", fontSize: "12px", color: "#d1d5db" }}>
+            <div style={{ display: "grid", gap: "8px", fontSize: "13px", color: "#334155" }}>
               <div>
-                <strong>1. Immediate Allocation:</strong> Switch orders to secondary fabric suppliers in Surat cluster within the next 48 hours.
+                <strong>1. Contact Backup Suppliers:</strong> Send orders to your backup suppliers within the next 48 hours to replace missing parts.
               </div>
               <div>
-                <strong>2. Inventory Rationing:</strong> Protect high-margin finished garments by reserving remaining georgette & chinon stock.
+                <strong>2. Save Important Orders:</strong> Prioritize making your highest-value products first with the parts you have left.
               </div>
               <div>
-                <strong>3. Buffer Window:</strong> You have {safeNumber(simulation?.summary?.max_delay_days, 3.3).toFixed(1)} days before assembly stoppage. Expedited transit can resolve shortage.
+                <strong>3. Watch the Clock:</strong> You have {safeNumber(simulation?.summary?.max_delay_days, 3.3).toFixed(1)} days of safety stock remaining before work stops.
               </div>
             </div>
           </div>
@@ -501,9 +486,9 @@ export default function DashboardOverview({
         /* Standby State (When no simulation is run yet) */
         <div
           style={{
-            padding: "14px 18px",
-            background: "rgba(61, 214, 140, 0.05)",
-            border: "1px solid rgba(61, 214, 140, 0.18)",
+            padding: "16px 20px",
+            background: "#f0fdf4",
+            border: "1px solid #bbf7d0",
             borderRadius: "12px",
             display: "flex",
             alignItems: "center",
@@ -511,106 +496,106 @@ export default function DashboardOverview({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <ShieldCheck size={18} color="#3dd68c" />
-            <span style={{ fontSize: "13px", fontWeight: 600, color: "#ececef" }}>
-              Supply Chain Baseline: All 8 Suppliers & Surat Assembly Lines Operational
+            <ShieldCheck size={20} color="#16a34a" />
+            <span style={{ fontSize: "13.5px", fontWeight: 600, color: "#166534" }}>
+              All Systems Ready: All suppliers and factories are currently running normally.
             </span>
           </div>
-          <span className="status-badge badge-running">READY TO SIMULATE</span>
+          <span className="status-badge badge-running">READY TO TEST</span>
         </div>
       )}
 
       {/* 5. Cascading Disruption Transmission & Studio Portal */}
-      <div className="modern-card" style={{ padding: "22px", background: "linear-gradient(135deg, rgba(232, 168, 56, 0.05) 0%, rgba(18, 22, 32, 0.95) 100%)", border: "1px solid rgba(232, 168, 56, 0.25)" }}>
+      <div className="modern-card" style={{ padding: "22px", background: "#ffffff", border: "1px solid #e2e8f0" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "18px", flexWrap: "wrap", gap: "14px" }}>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(232, 168, 56, 0.15)", display: "flex", alignItems: "center", justifyContent: "center", color: "#e8a838" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ width: "36px", height: "36px", borderRadius: "8px", background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center", color: "#2563eb" }}>
                 <Zap size={18} />
               </div>
-              <strong style={{ fontSize: "16px", color: "#f8fafc" }}>Multi-Tier Shock Propagation Pathway</strong>
+              <strong style={{ fontSize: "16px", color: "#0f172a" }}>How The Delay Spreads</strong>
             </div>
-            <div style={{ fontSize: "12.5px", color: "#94a3b8", marginTop: "4px" }}>
+            <div style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>
               {simulation
-                ? `Trace the real-time cascading outage triggered by ${simulation.supplier?.name} through your entire value chain.`
-                : "Active topology mapping showing how disruptions propagate from tier-1 suppliers down to customer deliveries."}
+                ? `See how the delay from ${simulation.supplier?.name} moves from the supplier to the factory and to your customer orders.`
+                : "See how any delay moves from the supplier to the factory and down to your customer deliveries."}
             </div>
           </div>
 
           <button
             className="primary-button"
-            style={{ fontSize: "13px", padding: "8px 18px", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 4px 14px rgba(232, 168, 56, 0.25)" }}
+            style={{ fontSize: "13px", padding: "8px 18px", display: "flex", alignItems: "center", gap: "8px" }}
             onClick={() => onNavigate("network")}
           >
             <Network size={16} />
-            <span>Open Dedicated Graph Studio</span>
+            <span>Open Supply Chain Map</span>
             <ArrowRight size={14} />
           </button>
         </div>
 
         {/* Transmission Stages Flow */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px", marginTop: "12px" }}>
-          <div style={{ padding: "14px", borderRadius: "10px", background: "rgba(0, 0, 0, 0.35)", border: "1px solid rgba(239, 68, 68, 0.25)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 700, color: "#f87171", textTransform: "uppercase" }}>
-              <Truck size={14} /> Tier-1 Disruption Source
+          <div style={{ padding: "16px", borderRadius: "10px", background: "#fef2f2", border: "1px solid #fecaca" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 700, color: "#dc2626", textTransform: "uppercase" }}>
+              <Truck size={14} /> 1. Delayed Supplier
             </div>
-            <strong style={{ fontSize: "14px", color: "#f8fafc", display: "block", marginTop: "4px" }}>
-              {simulation?.supplier?.name ?? "Select Supplier Above"}
+            <strong style={{ fontSize: "14px", color: "#0f172a", display: "block", marginTop: "4px" }}>
+              {simulation?.supplier?.name ?? "Pick a Supplier Above"}
             </strong>
-            <span style={{ fontSize: "11px", color: "#94a3b8" }}>
-              {simulation ? `${outageDuration} days outage simulated` : "Operational baseline"}
+            <span style={{ fontSize: "11.5px", color: "#64748b" }}>
+              {simulation ? `${outageDuration} days delay tested` : "Operating normally"}
             </span>
           </div>
 
-          <div style={{ padding: "14px", borderRadius: "10px", background: "rgba(0, 0, 0, 0.35)", border: "1px solid rgba(245, 158, 11, 0.25)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 700, color: "#fbbf24", textTransform: "uppercase" }}>
-              <Box size={14} /> Component Stockout
+          <div style={{ padding: "16px", borderRadius: "10px", background: "#fffbeb", border: "1px solid #fde68a" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 700, color: "#d97706", textTransform: "uppercase" }}>
+              <Box size={14} /> 2. Parts Running Low
             </div>
-            <strong style={{ fontSize: "14px", color: "#f8fafc", display: "block", marginTop: "4px" }}>
-              {simulation?.summary?.affected_components ?? 0} Raw Materials Depleted
+            <strong style={{ fontSize: "14px", color: "#0f172a", display: "block", marginTop: "4px" }}>
+              {simulation?.summary?.affected_components ?? 0} Raw Materials Affected
             </strong>
-            <span style={{ fontSize: "11px", color: "#94a3b8" }}>
-              {simulation ? `Gross shortage: ${formatSafe(simulation.summary?.gross_shortage)} units` : "Inventory buffer intact"}
+            <span style={{ fontSize: "11.5px", color: "#64748b" }}>
+              {simulation ? `Short by: ${formatSafe(simulation.summary?.gross_shortage)} units` : "Backup stock safe"}
             </span>
           </div>
 
-          <div style={{ padding: "14px", borderRadius: "10px", background: "rgba(0, 0, 0, 0.35)", border: "1px solid rgba(249, 115, 22, 0.25)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 700, color: "#fb923c", textTransform: "uppercase" }}>
-              <Factory size={14} /> Facility Throughput
+          <div style={{ padding: "16px", borderRadius: "10px", background: "#fff7ed", border: "1px solid #fed7aa" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 700, color: "#ea580c", textTransform: "uppercase" }}>
+              <Factory size={14} /> 3. Factory Impact
             </div>
-            <strong style={{ fontSize: "14px", color: "#f8fafc", display: "block", marginTop: "4px" }}>
-              {simulation?.summary?.affected_plants ?? 0} Assembly Units Halted
+            <strong style={{ fontSize: "14px", color: "#0f172a", display: "block", marginTop: "4px" }}>
+              {simulation?.summary?.affected_plants ?? 0} Factories Affected
             </strong>
-            <span style={{ fontSize: "11px", color: "#94a3b8" }}>
-              {simulation?.summary?.production_stop ? "Line halt triggered" : "Normal throughput"}
+            <span style={{ fontSize: "11.5px", color: "#64748b" }}>
+              {simulation?.summary?.production_stop ? "Factory will pause" : "Production continues"}
             </span>
           </div>
 
-          <div style={{ padding: "14px", borderRadius: "10px", background: "rgba(0, 0, 0, 0.35)", border: "1px solid rgba(56, 189, 248, 0.25)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 700, color: "#38bdf8", textTransform: "uppercase" }}>
-              <Package size={14} /> Customer Product Impact
+          <div style={{ padding: "16px", borderRadius: "10px", background: "#f0f9ff", border: "1px solid #bae6fd" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 700, color: "#0284c7", textTransform: "uppercase" }}>
+              <Package size={14} /> 4. Customer Deliveries
             </div>
-            <strong style={{ fontSize: "14px", color: "#f8fafc", display: "block", marginTop: "4px" }}>
-              {simulation?.summary?.affected_products ?? 0} Finished SKUs Delayed
+            <strong style={{ fontSize: "14px", color: "#0f172a", display: "block", marginTop: "4px" }}>
+              {simulation?.summary?.affected_products ?? 0} Products Delayed
             </strong>
-            <span style={{ fontSize: "11px", color: "#94a3b8" }}>
-              {simulation ? `Est. delay: +${simulation.summary?.max_delay_days ?? 0} days` : "On schedule"}
+            <span style={{ fontSize: "11.5px", color: "#64748b" }}>
+              {simulation ? `Estimated delay: +${simulation.summary?.max_delay_days ?? 0} days` : "On schedule"}
             </span>
           </div>
         </div>
 
-        <div style={{ marginTop: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "12px", borderTop: "1px solid rgba(255, 255, 255, 0.06)", flexWrap: "wrap", gap: "10px" }}>
-          <div style={{ fontSize: "12px", color: "#94a3b8", display: "flex", alignItems: "center", gap: "6px" }}>
-            <Info size={14} color="#e8a838" />
-            <span>Interactive graph topology is exclusively rendered in the <strong>Graph Intelligence Suite</strong> for maximum screen space and high-resolution inspection.</span>
+        <div style={{ marginTop: "16px", display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "14px", borderTop: "1px solid #e2e8f0", flexWrap: "wrap", gap: "10px" }}>
+          <div style={{ fontSize: "12.5px", color: "#64748b", display: "flex", alignItems: "center", gap: "6px" }}>
+            <Info size={14} color="#2563eb" />
+            <span>Want to see every connection visually? Click the button to see the full interactive map.</span>
           </div>
           <button
             onClick={() => onNavigate("network")}
             style={{
               background: "transparent",
               border: "none",
-              color: "#e8a838",
-              fontSize: "12.5px",
+              color: "#2563eb",
+              fontSize: "13px",
               fontWeight: 600,
               cursor: "pointer",
               display: "inline-flex",
@@ -618,29 +603,29 @@ export default function DashboardOverview({
               gap: "4px",
             }}
           >
-            <span>View Fullscreen Nodes & Links</span>
+            <span>Open Full Interactive Map</span>
             <ExternalLink size={13} />
           </button>
         </div>
       </div>
 
       {/* 6. Quick Partner Selector Table */}
-      <div className="modern-card" style={{ padding: "18px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+      <div className="modern-card" style={{ padding: "20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
           <div>
-            <strong style={{ fontSize: "14px", color: "#ececef" }}>Direct Supplier Stress Testing</strong>
-            <div style={{ fontSize: "11px", color: "#8e8e96" }}>Click "Simulate Outage" to instantly test any partner</div>
+            <strong style={{ fontSize: "14.5px", color: "#0f172a" }}>Direct Supplier Quick Testing</strong>
+            <div style={{ fontSize: "12px", color: "#64748b" }}>Click "Test Delay" to instantly check any supplier</div>
           </div>
           <button
             className="secondary-button"
-            style={{ fontSize: "11px", padding: "4px 10px" }}
+            style={{ fontSize: "12px", padding: "5px 12px" }}
             onClick={() => onNavigate("catalog")}
           >
             View All Suppliers
           </button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "10px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "12px" }}>
           {suppliers.slice(0, 6).map((s) => (
             <div
               key={s.supplier_id}
@@ -648,26 +633,27 @@ export default function DashboardOverview({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: "10px 14px",
-                background: "rgba(255, 255, 255, 0.02)",
-                border: "1px solid rgba(255, 255, 255, 0.06)",
+                padding: "12px 16px",
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
                 borderRadius: "8px",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <Truck size={16} color="#e8a838" />
+                <Truck size={17} color="#2563eb" />
                 <div>
-                  <strong style={{ fontSize: "13px", color: "#ececef", display: "block" }}>{s.name}</strong>
-                  <span style={{ fontSize: "11px", color: "#8e8e96" }}>{s.city ?? "Surat"} · {s.supplier_id}</span>
+                  <strong style={{ fontSize: "13px", color: "#0f172a", display: "block" }}>{s.name}</strong>
+                  <span style={{ fontSize: "11px", color: "#64748b" }}>{s.city ?? "Surat"} · {s.supplier_id}</span>
                 </div>
               </div>
 
               <button
                 className="secondary-button"
-                style={{ fontSize: "11px", padding: "4px 10px" }}
+                style={{ fontSize: "11.5px", padding: "5px 12px" }}
                 onClick={() => handleRunSimulation(s.supplier_id)}
               >
-                Test Outage
+                Test Delay
               </button>
             </div>
           ))}

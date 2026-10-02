@@ -70,8 +70,9 @@ class IntelligencePipeline:
     disruption location appears in the news.
     """
 
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session, user_id: int | None = None) -> None:
         self.db = db
+        self.user_id = user_id
         self.neo4j = Neo4jService()
 
     # =========================================================
@@ -387,7 +388,45 @@ class IntelligencePipeline:
                     ["nlp_supplier_entity"],
                 )
 
-        # 3. Strong supplier-name token evidence.
+        # 3. Supporting location evidence.
+        city_match = False
+        if normalized_city:
+            city_tokens = [
+                c.strip()
+                for c in normalized_city.split()
+                if len(c.strip()) >= 3
+                and c.strip() not in {
+                    "uttar",
+                    "pradesh",
+                    "gujarat",
+                    "maharashtra",
+                    "karnataka",
+                    "india",
+                }
+            ]
+            if (
+                normalized_city in normalized_text
+                or normalized_city in normalized_locations
+            ):
+                city_match = True
+            elif any(
+                ct in normalized_text
+                or ct in normalized_locations
+                for ct in city_tokens
+            ):
+                city_match = True
+
+        country_match = False
+        if (
+            normalized_country
+            and (
+                normalized_country in normalized_text
+                or normalized_country in normalized_locations
+            )
+        ):
+            country_match = True
+
+        # 4. Token overlap & Disruption keywords
         supplier_tokens = cls._meaningful_tokens(
             normalized_name
         )
@@ -398,71 +437,79 @@ class IntelligencePipeline:
 
         overlap = supplier_tokens & text_tokens
 
-        strong_token_match = (
-            len(supplier_tokens) >= 2
-            and overlap == supplier_tokens
+        disruption_terms = {
+            "flood",
+            "flooding",
+            "rain",
+            "monsoon",
+            "downpour",
+            "strike",
+            "halt",
+            "halted",
+            "shutdown",
+            "closed",
+            "delay",
+            "delayed",
+            "bottleneck",
+            "accident",
+            "fire",
+            "explosion",
+            "storm",
+            "cyclone",
+            "traffic",
+            "stoppage",
+            "blocked",
+            "congestion",
+            "disruption",
+            "waterlogging",
+            "blast",
+            "power",
+            "grid",
+            "outage",
+            "failure",
+            "damage",
+            "curfew",
+        }
+        has_disruption = bool(
+            disruption_terms & text_tokens
         )
 
-        if not strong_token_match:
+        # Match Tier A: 2 or more distinct supplier tokens match
+        if len(overlap) >= 2:
+            score = 80 + min(len(overlap) * 5, 15)
+            reasons = ["supplier_name_tokens"]
+            if city_match:
+                score = min(score + 5, 95)
+                reasons.append("supplier_city")
+            return (score, reasons)
+
+        # Match Tier B: At least 1 supplier token + City match
+        if len(overlap) >= 1 and city_match:
             return (
-                0,
-                [],
+                85,
+                ["supplier_token_and_city"],
             )
 
-        # 4. Supporting location evidence.
-        city_match = False
+        # Match Tier C: Direct City match during a reported disruption
+        if city_match and has_disruption:
+            return (
+                80,
+                ["supplier_city_disrupted"],
+            )
 
-        if (
-            normalized_city
-            and normalized_city in normalized_text
-        ):
-            city_match = True
-
-        elif (
-            normalized_city
-            and normalized_city in normalized_locations
-        ):
-            city_match = True
-
-        country_match = False
-
-        if (
-            normalized_country
-            and normalized_country in normalized_text
-        ):
-            country_match = True
-
-        elif (
-            normalized_country
-            and normalized_country in normalized_locations
-        ):
-            country_match = True
-
-        reasons = [
-            "supplier_name_tokens",
+        # Match Tier D: Distinctive keyword match (e.g. unique word of length >= 5)
+        distinctive_overlap = [
+            t for t in overlap if len(t) >= 5
         ]
-
-        if city_match:
-            reasons.append(
-                "supplier_city"
+        if distinctive_overlap:
+            return (
+                75,
+                ["distinctive_keyword_match"],
             )
-
-        if country_match:
-            reasons.append(
-                "supplier_country"
-            )
-
-        score = 75
-
-        if city_match:
-            score += 20
-
-        elif country_match:
-            score += 10
 
         return (
-            min(score, 95),
-            reasons,
+            0,
+            [],
         )
 
 
@@ -477,10 +524,11 @@ class IntelligencePipeline:
             f"{title} {description}"
         )
 
+        bs_query = self.db.query(BusinessSupplier)
+        if self.user_id is not None:
+            bs_query = bs_query.filter(BusinessSupplier.user_id == self.user_id)
         business_suppliers = (
-            self.db.query(
-                BusinessSupplier
-            )
+            bs_query
             .order_by(
                 BusinessSupplier.supplier_name.asc()
             )
@@ -633,16 +681,23 @@ class IntelligencePipeline:
             if item["match_score"] >= 90
         ]
 
-        if exact_matches:
-            return exact_matches
-
-        strong_matches = [
+        target_list = exact_matches if exact_matches else [
             item
             for item in matches
             if item["match_score"] >= 75
         ]
 
-        return strong_matches
+        seen_ids = set()
+        deduped = []
+        for item in target_list:
+            sid = item.get("supplier_id")
+            if sid and sid in seen_ids:
+                continue
+            if sid:
+                seen_ids.add(sid)
+            deduped.append(item)
+
+        return deduped
 
     # =========================================================
     # OLD CANONICAL ENTITY MATCHING
@@ -966,7 +1021,8 @@ class IntelligencePipeline:
 
         simulator = (
             DisruptionSimulator(
-                self.db
+                self.db,
+                user_id=self.user_id,
             )
         )
 
@@ -1843,7 +1899,10 @@ class IntelligencePipeline:
         )
 
         from app.models.business_supply_chain import Company
-        active_co = self.db.query(Company).first()
+        co_q = self.db.query(Company)
+        if self.user_id is not None:
+            co_q = co_q.filter(Company.user_id == self.user_id)
+        active_co = co_q.first()
         active_cid = active_co.company_id if active_co else None
 
         event = Event(

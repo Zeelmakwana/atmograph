@@ -21,6 +21,13 @@ import {
 } from "../services/supplyChainApi";
 
 interface IncidentRadarPageProps {
+  initialEvent?: {
+    id?: number;
+    title?: string;
+    description?: string;
+    source?: string;
+    activatedAt?: number;
+  } | null;
   onNavigateToSimulator: (supplierId?: string) => void;
   onOpenWorkspaceModal?: () => void;
 }
@@ -150,13 +157,14 @@ function getPresetsForBusiness(catalog: SupplyChainCatalog | null): IncidentPres
 }
 
 export default function IncidentRadarPage({
+  initialEvent,
   onNavigateToSimulator,
   onOpenWorkspaceModal,
 }: IncidentRadarPageProps) {
   const [catalog, setCatalog] = useState<SupplyChainCatalog | null>(null);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [source, setSource] = useState("");
+  const [title, setTitle] = useState(initialEvent?.title || "");
+  const [description, setDescription] = useState(initialEvent?.description || "");
+  const [source, setSource] = useState(initialEvent?.source || "");
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -165,6 +173,12 @@ export default function IncidentRadarPage({
     try {
       const cat = await getSupplyChainCatalog();
       setCatalog(cat);
+      if (initialEvent && initialEvent.title) {
+        setTitle(initialEvent.title);
+        setDescription(initialEvent.description || "");
+        setSource(initialEvent.source || "Historical Incident Archive");
+        return;
+      }
       const presets = getPresetsForBusiness(cat);
       if (presets.length > 0) {
         setTitle(presets[0].title);
@@ -174,7 +188,7 @@ export default function IncidentRadarPage({
     } catch (err) {
       console.warn("Failed to load catalog for incident radar:", err);
     }
-  }, []);
+  }, [initialEvent]);
 
   useEffect(() => {
     void loadData();
@@ -191,6 +205,38 @@ export default function IncidentRadarPage({
     };
   }, [loadData]);
 
+  // When an event is activated from History, auto-load and auto-analyze it!
+  useEffect(() => {
+    if (initialEvent && initialEvent.title) {
+      const activeTitle = initialEvent.title;
+      const activeDesc = initialEvent.description || "";
+      const activeSrc = initialEvent.source || "Historical Incident Archive";
+
+      setTitle(activeTitle);
+      setDescription(activeDesc);
+      setSource(activeSrc);
+      setResult(null);
+      setError(null);
+
+      void (async () => {
+        setAnalyzing(true);
+        try {
+          const res = await analyzeNews(
+            activeTitle.trim(),
+            activeDesc.trim(),
+            activeSrc,
+            true
+          );
+          setResult(res);
+        } catch (e: any) {
+          setError(e?.message || "Failed to analyze activated incident.");
+        } finally {
+          setAnalyzing(false);
+        }
+      })();
+    }
+  }, [initialEvent]);
+
   const presets = getPresetsForBusiness(catalog);
   const activeCompany = catalog?.company;
 
@@ -203,10 +249,15 @@ export default function IncidentRadarPage({
     setAnalyzing(true);
     setError(null);
     try {
-      const response = await analyzeNews(title, description, source, true);
+      const src = source.trim() || "Manual Incident Report";
+      const response = await analyzeNews(title.trim(), description.trim(), src, true);
       setResult(response);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to analyze incident.");
+    } catch (err: any) {
+      let msg = err instanceof Error ? err.message : String(err);
+      if (typeof msg !== "string" || msg.includes("[object")) {
+        msg = "Failed to analyze incident. Please check your connection or details.";
+      }
+      setError(msg);
     } finally {
       setAnalyzing(false);
     }
@@ -223,21 +274,21 @@ export default function IncidentRadarPage({
   const businessImpact =
     result?.business_supply_chain ?? result?.data?.business_supply_chain;
   const matchedSuppliers =
-    result?.matched_suppliers ?? businessImpact?.matched_suppliers ?? [];
+    businessImpact?.matched_suppliers ?? result?.matched_suppliers ?? [];
 
   return (
     <div className="page-container">
       {/* Header */}
       <div className="page-header-row">
         <div className="page-headline">
-          <span className="eyebrow-tag">DISRUPTION INTELLIGENCE RADAR</span>
-          <h2>Real-Time Incident & News Scanner</h2>
+          <span className="eyebrow-tag">LIVE ALERTS & NEWS</span>
+          <h2>Live News & Disruption Alerts</h2>
           <p>
-            Scan breaking news, port bulletins, or weather disruptions. The AI engine extracts affected suppliers for{" "}
-            <strong style={{ color: "#ececef" }}>
+            Check breaking news, weather, or port delays. The system automatically finds which suppliers are affected for{" "}
+            <strong style={{ color: "#0f172a" }}>
               {activeCompany?.company_name || "Active Business"}
             </strong>{" "}
-            and predicts upstream/downstream ripple effects.
+            and shows what happens to your deliveries.
           </p>
         </div>
 
@@ -249,10 +300,10 @@ export default function IncidentRadarPage({
               gap: "8px",
               padding: "6px 14px",
               borderRadius: "9999px",
-              background: "rgba(232, 168, 56, 0.12)",
-              border: "1px solid rgba(232, 168, 56, 0.3)",
+              background: "rgba(37, 99, 235, 0.08)",
+              border: "1px solid rgba(37, 99, 235, 0.2)",
               fontSize: "12px",
-              color: "#e8a838",
+              color: "#2563eb",
               fontWeight: 600,
             }}
           >
@@ -260,11 +311,11 @@ export default function IncidentRadarPage({
             <span>
               {activeCompany?.company_name
                 ? activeCompany.company_name.length > 25
-                  ? activeCompany.company_name.slice(0, 25) + "..."
+                ? activeCompany.company_name.slice(0, 25) + "..."
                   : activeCompany.company_name
                 : "Active Business"}
             </span>
-            <span style={{ color: "#8e8e96", fontWeight: 400 }}>
+            <span style={{ color: "#64748b", fontWeight: 400 }}>
               ({activeCompany?.industry || "Supply Chain"})
             </span>
           </div>
@@ -276,15 +327,15 @@ export default function IncidentRadarPage({
               gap: "6px",
               padding: "6px 12px",
               borderRadius: "9999px",
-              background: "rgba(61, 214, 140, 0.1)",
-              border: "1px solid rgba(61, 214, 140, 0.25)",
+              background: "rgba(22, 163, 74, 0.1)",
+              border: "1px solid rgba(22, 163, 74, 0.25)",
               fontSize: "11.5px",
-              color: "#3dd68c",
+              color: "#16a34a",
               fontWeight: 600,
             }}
           >
             <Radio size={14} className="sc-spin" style={{ animationDuration: "3s" }} />
-            Radar Active
+            Scanner Active
           </span>
         </div>
       </div>
@@ -293,13 +344,13 @@ export default function IncidentRadarPage({
       <div className="modern-card" style={{ padding: "18px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Sparkles size={16} color="#e8a838" />
-            <strong style={{ fontSize: "13px", color: "#ececef" }}>
-              Quick Scenario Presets for {activeCompany?.company_name || "Active Business"}:
+            <Sparkles size={16} color="#2563eb" />
+            <strong style={{ fontSize: "13px", color: "#0f172a" }}>
+              Click an Example Alert to Test ({activeCompany?.company_name || "Active Business"}):
             </strong>
           </div>
-          <span style={{ fontSize: "11px", color: "#8e8e96" }}>
-            Dynamically generated from {catalog?.suppliers?.length || 0} active suppliers
+          <span style={{ fontSize: "12px", color: "#64748b" }}>
+            Based on {catalog?.suppliers?.length || 0} active suppliers
           </span>
         </div>
 
@@ -314,11 +365,11 @@ export default function IncidentRadarPage({
                   textAlign: "left",
                   padding: "12px 14px",
                   background: isSelected
-                    ? "rgba(232, 168, 56, 0.12)"
-                    : "rgba(255, 255, 255, 0.02)",
+                    ? "rgba(37, 99, 235, 0.08)"
+                    : "#ffffff",
                   border: isSelected
-                    ? "1px solid rgba(232, 168, 56, 0.45)"
-                    : "1px solid rgba(255, 255, 255, 0.07)",
+                    ? "2px solid #2563eb"
+                    : "1px solid #e2e8f0",
                   borderRadius: "8px",
                   transition: "all 0.2s",
                   cursor: "pointer",
@@ -327,8 +378,8 @@ export default function IncidentRadarPage({
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "6px" }}>
                   <strong
                     style={{
-                      fontSize: "12px",
-                      color: isSelected ? "#f0b848" : "#ececef",
+                      fontSize: "12.5px",
+                      color: isSelected ? "#2563eb" : "#0f172a",
                       display: "block",
                       lineHeight: 1.35,
                     }}
@@ -340,12 +391,13 @@ export default function IncidentRadarPage({
                 {p.target && (
                   <div
                     style={{
-                      color: "#4ade80",
-                      fontSize: "10.5px",
+                      color: "#16a34a",
+                      fontSize: "11px",
                       marginTop: "6px",
                       display: "inline-flex",
                       alignItems: "center",
                       gap: "4px",
+                      fontWeight: 500,
                     }}
                   >
                     <Truck size={11} />
@@ -355,8 +407,8 @@ export default function IncidentRadarPage({
 
                 <small
                   style={{
-                    color: "#8e8e96",
-                    fontSize: "10px",
+                    color: "#64748b",
+                    fontSize: "11px",
                     marginTop: "4px",
                     display: "block",
                   }}
@@ -375,37 +427,71 @@ export default function IncidentRadarPage({
         <div className="panel">
           <div className="panel-header">
             <div>
-              <span className="panel-kicker">INCIDENT INGESTION</span>
-              <h3>Disruption Event Details</h3>
+              <span className="panel-kicker">INCIDENT DETAILS</span>
+              <h3>Alert Information</h3>
             </div>
-            <Newspaper size={18} color="#e8a838" />
+            <Newspaper size={18} color="#2563eb" />
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            {initialEvent && initialEvent.title && (
+              <div
+                style={{
+                  background: "#eff6ff",
+                  border: "1px solid #bfdbfe",
+                  borderRadius: "8px",
+                  padding: "10px 12px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#1e40af" }}>
+                  <CheckCircle2 size={16} color="#2563eb" style={{ flexShrink: 0 }} />
+                  <span>
+                    <strong>Loaded from Incident History:</strong> {initialEvent.title}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    background: "#dbeafe",
+                    color: "#1d4ed8",
+                    padding: "2px 8px",
+                    borderRadius: "6px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Active Incident
+                </span>
+              </div>
+            )}
             <div>
               <label
                 style={{
                   fontSize: "11px",
                   fontWeight: 700,
-                  color: "#8e8e96",
+                  color: "#64748b",
                   textTransform: "uppercase",
                   display: "block",
                   marginBottom: 6,
                 }}
               >
-                Incident Headline / Title
+                Alert Headline / Title
               </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Kannauj Distillation Belt Flooding & Sandalwood Base Delay..."
+                placeholder="e.g. Flood near factory or port delay..."
                 style={{
                   width: "100%",
-                  background: "#0e0e10",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  background: "#ffffff",
+                  border: "1px solid #cbd5e1",
                   borderRadius: "8px",
                   padding: "10px 14px",
-                  color: "#ececef",
+                  color: "#0f172a",
                   fontSize: "13px",
                   outline: "none",
                   boxSizing: "border-box",
@@ -418,26 +504,26 @@ export default function IncidentRadarPage({
                 style={{
                   fontSize: "11px",
                   fontWeight: 700,
-                  color: "#8e8e96",
+                  color: "#64748b",
                   textTransform: "uppercase",
                   display: "block",
                   marginBottom: 6,
                 }}
               >
-                Full Description & Context
+                Description & What Happened
               </label>
               <textarea
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe the disruption, locations, suppliers, affected goods, estimated delay..."
+                placeholder="Describe the delay, location, suppliers, parts affected, or days of delay..."
                 style={{
                   width: "100%",
-                  background: "#0e0e10",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  background: "#ffffff",
+                  border: "1px solid #cbd5e1",
                   borderRadius: "8px",
                   padding: "10px 14px",
-                  color: "#ececef",
+                  color: "#0f172a",
                   fontSize: "13px",
                   outline: "none",
                   resize: "vertical",
@@ -451,25 +537,25 @@ export default function IncidentRadarPage({
                 style={{
                   fontSize: "11px",
                   fontWeight: 700,
-                  color: "#8e8e96",
+                  color: "#64748b",
                   textTransform: "uppercase",
                   display: "block",
                   marginBottom: 6,
                 }}
               >
-                Intelligence Source
+                News Source
               </label>
               <input
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
-                placeholder="e.g. Regional Commercial Gazette, Trade Notice..."
+                placeholder="e.g. Local News, Supplier Notice, Highway Report..."
                 style={{
                   width: "100%",
-                  background: "#0e0e10",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  background: "#ffffff",
+                  border: "1px solid #cbd5e1",
                   borderRadius: "8px",
                   padding: "10px 14px",
-                  color: "#ececef",
+                  color: "#0f172a",
                   fontSize: "13px",
                   outline: "none",
                   boxSizing: "border-box",
@@ -481,10 +567,10 @@ export default function IncidentRadarPage({
               <div
                 style={{
                   padding: "10px 14px",
-                  background: "rgba(232, 93, 93, 0.1)",
-                  border: "1px solid rgba(232, 93, 93, 0.25)",
+                  background: "#fef2f2",
+                  border: "1px solid #fecaca",
                   borderRadius: "8px",
-                  color: "#f87171",
+                  color: "#b91c1c",
                   fontSize: "12px",
                 }}
               >
@@ -501,18 +587,20 @@ export default function IncidentRadarPage({
                 justifyContent: "center",
                 padding: "12px",
                 marginTop: "4px",
+                background: "#2563eb",
+                color: "#ffffff",
                 cursor: analyzing ? "not-allowed" : "pointer",
               }}
             >
               {analyzing ? (
                 <>
                   <Loader2 size={16} className="sc-spin" />
-                  Analyzing Disruption Impact...
+                  Checking Disruption Impact...
                 </>
               ) : (
                 <>
                   <Send size={16} />
-                  Analyze Disruption & Calculate Ripple Effect
+                  Check Disruption Impact
                 </>
               )}
             </button>
@@ -523,23 +611,24 @@ export default function IncidentRadarPage({
         <div className="panel">
           <div className="panel-header">
             <div>
-              <span className="panel-kicker">RADAR INTELLIGENCE</span>
-              <h3>Impact & Entity Resolution</h3>
+              <span className="panel-kicker">IMPACT RESULTS</span>
+              <h3>How It Affects Your Business</h3>
             </div>
             {result ? (
               <span
                 style={{
-                  color: "#3dd68c",
+                  color: "#16a34a",
                   fontSize: "12px",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "4px",
+                  fontWeight: 600,
                 }}
               >
-                <CheckCircle2 size={15} /> Analysis Complete
+                <CheckCircle2 size={15} /> Check Complete
               </span>
             ) : (
-              <Clock size={16} color="#8e8e96" />
+              <Clock size={16} color="#64748b" />
             )}
           </div>
 
@@ -548,20 +637,20 @@ export default function IncidentRadarPage({
               style={{
                 padding: "48px 24px",
                 textAlign: "center",
-                color: "#8e8e96",
+                color: "#64748b",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 gap: "12px",
               }}
             >
-              <Radio size={36} color="#2b2d31" />
+              <Radio size={36} color="#cbd5e1" />
               <div>
-                <strong style={{ display: "block", color: "#ececef", marginBottom: "4px" }}>
-                  Awaiting Incident Scan
+                <strong style={{ display: "block", color: "#0f172a", marginBottom: "4px", fontSize: "15px" }}>
+                  Ready to Test an Alert
                 </strong>
-                <p style={{ margin: 0, fontSize: "12px", maxWidth: "340px", lineHeight: 1.5 }}>
-                  Select one of the business scenario presets above or type a breaking notice to resolve affected suppliers and simulate business shock waves.
+                <p style={{ margin: 0, fontSize: "13px", maxWidth: "340px", lineHeight: 1.5 }}>
+                  Click one of the example alerts above or type news details on the left, then click 'Check Disruption Impact'.
                 </p>
               </div>
             </div>
@@ -571,8 +660,8 @@ export default function IncidentRadarPage({
               <div
                 style={{
                   padding: "14px 16px",
-                  background: "rgba(255, 255, 255, 0.03)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  background: "#f8fafc",
+                  border: "1px solid #e2e8f0",
                   borderRadius: "8px",
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
@@ -580,17 +669,17 @@ export default function IncidentRadarPage({
                 }}
               >
                 <div>
-                  <span style={{ fontSize: "10px", color: "#8e8e96", textTransform: "uppercase", display: "block" }}>
-                    Detected Event Type
+                  <span style={{ fontSize: "10px", color: "#64748b", textTransform: "uppercase", display: "block" }}>
+                    Incident Type
                   </span>
-                  <strong style={{ fontSize: "12.5px", color: "#ececef" }}>
-                    {result?.event?.event_type ?? result?.nlp?.event_type ?? "Supply Chain Shock"}
+                  <strong style={{ fontSize: "13px", color: "#0f172a" }}>
+                    {result?.event?.event_type ?? result?.nlp?.event_type ?? "Supply Disruption"}
                   </strong>
                 </div>
 
                 <div>
-                  <span style={{ fontSize: "10px", color: "#8e8e96", textTransform: "uppercase", display: "block" }}>
-                    Assessed Severity
+                  <span style={{ fontSize: "10px", color: "#64748b", textTransform: "uppercase", display: "block" }}>
+                    Severity Level
                   </span>
                   <span
                     style={{
@@ -603,16 +692,16 @@ export default function IncidentRadarPage({
                       marginTop: "2px",
                       background:
                         result?.event?.severity === "critical"
-                          ? "rgba(232, 93, 93, 0.15)"
+                          ? "#fee2e2"
                           : result?.event?.severity === "high"
-                          ? "rgba(232, 168, 56, 0.15)"
-                          : "rgba(61, 214, 140, 0.15)",
+                          ? "#fef3c7"
+                          : "#dcfce7",
                       color:
                         result?.event?.severity === "critical"
-                          ? "#f87171"
+                          ? "#dc2626"
                           : result?.event?.severity === "high"
-                          ? "#f0b848"
-                          : "#3dd68c",
+                          ? "#d97706"
+                          : "#16a34a",
                     }}
                   >
                     {result?.event?.severity ?? "Medium"}
@@ -620,26 +709,26 @@ export default function IncidentRadarPage({
                 </div>
 
                 <div>
-                  <span style={{ fontSize: "10px", color: "#8e8e96", textTransform: "uppercase", display: "block" }}>
-                    Detected Location
+                  <span style={{ fontSize: "10px", color: "#64748b", textTransform: "uppercase", display: "block" }}>
+                    Location
                   </span>
-                  <strong style={{ fontSize: "12.5px", color: "#ececef" }}>
+                  <strong style={{ fontSize: "13px", color: "#0f172a" }}>
                     {typeof result?.event?.location === "string"
                       ? result.event.location
                       : typeof result?.location?.primary_location?.name === "string"
                       ? result.location.primary_location.name
                       : typeof result?.nlp?.entities?.location === "string"
                       ? result.nlp.entities.location
-                      : "Identified Hub"}
+                      : "Identified City"}
                   </strong>
                 </div>
 
                 <div>
-                  <span style={{ fontSize: "10px", color: "#8e8e96", textTransform: "uppercase", display: "block" }}>
-                    Company Scoped
+                  <span style={{ fontSize: "10px", color: "#64748b", textTransform: "uppercase", display: "block" }}>
+                    Company
                   </span>
-                  <strong style={{ fontSize: "12.5px", color: "#e8a838" }}>
-                    {activeCompany?.company_name ? activeCompany.company_name.slice(0, 20) : "Active Account"}
+                  <strong style={{ fontSize: "13px", color: "#2563eb" }}>
+                    {activeCompany?.company_name ? activeCompany.company_name.slice(0, 20) : "Active Business"}
                   </strong>
                 </div>
               </div>
@@ -650,27 +739,34 @@ export default function IncidentRadarPage({
                   style={{
                     fontSize: "11px",
                     fontWeight: 700,
-                    color: "#8e8e96",
+                    color: "#64748b",
                     textTransform: "uppercase",
                     display: "block",
                     marginBottom: "8px",
                   }}
                 >
-                  Affected Suppliers Resolved ({matchedSuppliers.length})
+                  Affected Suppliers Found ({matchedSuppliers.length})
                 </span>
 
                 {matchedSuppliers.length === 0 ? (
                   <div
                     style={{
-                      padding: "12px",
-                      background: "rgba(232, 168, 56, 0.08)",
-                      border: "1px solid rgba(232, 168, 56, 0.2)",
+                      padding: "16px",
+                      background: "#f0fdf4",
+                      border: "1px solid #bbf7d0",
                       borderRadius: "8px",
-                      fontSize: "12px",
-                      color: "#f0b848",
+                      fontSize: "13px",
+                      color: "#166534",
+                      lineHeight: 1.5,
                     }}
                   >
-                    No direct supplier name match found for this incident text. Try using one of the preset scenarios or mentioning a supplier city (e.g. Kannauj, Mumbai, Firozabad, Ahmedabad).
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                      <CheckCircle2 size={16} color="#16a34a" />
+                      <strong style={{ fontSize: "13.5px" }}>Your Supply Chain Is Safe</strong>
+                    </div>
+                    <p style={{ margin: 0, fontSize: "12.5px", color: "#15803d" }}>
+                      Good news! None of your 8 registered active suppliers operate in this reported disruption zone. Your factory shipments and inventory are safe.
+                    </p>
                   </div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -681,9 +777,10 @@ export default function IncidentRadarPage({
                         <div
                           key={idx}
                           style={{
-                            padding: "10px 14px",
-                            background: "rgba(255, 255, 255, 0.03)",
-                            border: "1px solid rgba(255, 255, 255, 0.08)",
+                            padding: "12px 14px",
+                            background: "#ffffff",
+                            border: "1px solid #fecaca",
+                            borderLeft: "4px solid #dc2626",
                             borderRadius: "8px",
                             display: "flex",
                             alignItems: "center",
@@ -691,26 +788,33 @@ export default function IncidentRadarPage({
                           }}
                         >
                           <div>
-                            <strong style={{ fontSize: "12.5px", color: "#ececef", display: "block" }}>
-                              {supName}
-                            </strong>
-                            <small style={{ color: "#8e8e96", fontSize: "11px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <AlertTriangle size={14} color="#dc2626" />
+                              <strong style={{ fontSize: "13.5px", color: "#0f172a" }}>
+                                {supName}
+                              </strong>
+                            </div>
+                            <div style={{ color: "#64748b", fontSize: "11.5px", marginTop: "3px" }}>
                               ID: {supId} {sup.city ? `· Location: ${sup.city}` : ""}
-                            </small>
+                            </div>
                           </div>
 
                           <button
                             className="secondary-btn"
                             onClick={() => onNavigateToSimulator(supId)}
                             style={{
-                              padding: "5px 10px",
-                              fontSize: "11px",
+                              padding: "6px 12px",
+                              fontSize: "12px",
                               display: "inline-flex",
                               alignItems: "center",
                               gap: "4px",
+                              background: "#f1f5f9",
+                              border: "1px solid #cbd5e1",
+                              color: "#0f172a",
+                              fontWeight: 600,
                             }}
                           >
-                            <span>Simulate Impact</span>
+                            <span>Test Delay</span>
                             <ArrowRight size={12} />
                           </button>
                         </div>
@@ -721,93 +825,107 @@ export default function IncidentRadarPage({
               </div>
 
               {/* Simulation ripple impact snippet */}
-              {businessImpact && (
+              {businessImpact && matchedSuppliers.length > 0 && (
                 <div
                   style={{
                     padding: "16px",
-                    background: "linear-gradient(135deg, rgba(232, 168, 56, 0.08) 0%, rgba(18, 22, 32, 0.95) 100%)",
-                    border: "1px solid rgba(232, 168, 56, 0.3)",
+                    background: "rgba(37, 99, 235, 0.05)",
+                    border: "1px solid rgba(37, 99, 235, 0.2)",
                     borderRadius: "10px",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <Zap size={16} color="#e8a838" />
-                      <strong style={{ fontSize: "13px", color: "#f0b848" }}>
-                        Automatic Business Ripple Shock Summary
+                      <Zap size={16} color="#2563eb" />
+                      <strong style={{ fontSize: "13px", color: "#2563eb" }}>
+                        How The Delay Spreads (Impact Summary)
                       </strong>
                     </div>
-                    {matchedSuppliers.length > 0 && (
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          fontWeight: 700,
-                          padding: "2px 8px",
-                          borderRadius: "4px",
-                          background: "rgba(239, 68, 68, 0.2)",
-                          color: "#f87171",
-                          border: "1px solid rgba(239, 68, 68, 0.35)",
-                        }}
-                      >
-                        {matchedSuppliers.length} Supplier Disruption Active
-                      </span>
-                    )}
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        background: "#fee2e2",
+                        color: "#dc2626",
+                        border: "1px solid #fecaca",
+                      }}
+                    >
+                      {matchedSuppliers.length} Supplier Disruption Active
+                    </span>
                   </div>
 
                   {/* Summary Metric Chips */}
                   {businessImpact.summary && typeof businessImpact.summary === "object" ? (
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "8px", marginBottom: "12px" }}>
-                      <div style={{ padding: "8px 10px", background: "rgba(0,0,0,0.35)", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        <span style={{ fontSize: "10px", color: "#8e8e96", display: "block" }}>AFFECTED COMPONENTS</span>
-                        <strong style={{ fontSize: "14px", color: "#f8fafc" }}>{businessImpact.summary.affected_components ?? 0}</strong>
+                      <div style={{ padding: "8px 10px", background: "#ffffff", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                        <span style={{ fontSize: "10px", color: "#64748b", display: "block" }}>AFFECTED PARTS</span>
+                        <strong style={{ fontSize: "14px", color: "#0f172a" }}>{businessImpact.summary.affected_components ?? 0} Raw Materials</strong>
                       </div>
-                      <div style={{ padding: "8px 10px", background: "rgba(0,0,0,0.35)", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        <span style={{ fontSize: "10px", color: "#8e8e96", display: "block" }}>PLANTS AT RISK</span>
-                        <strong style={{ fontSize: "14px", color: businessImpact.summary.production_stop ? "#f87171" : "#fbbf24" }}>
-                          {businessImpact.summary.affected_plants ?? 0} {businessImpact.summary.production_stop ? "(HALT)" : ""}
+                      <div style={{ padding: "8px 10px", background: "#ffffff", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                        <span style={{ fontSize: "10px", color: "#64748b", display: "block" }}>FACTORIES AT RISK</span>
+                        <strong style={{ fontSize: "14px", color: businessImpact.summary.production_stop ? "#dc2626" : "#d97706" }}>
+                          {businessImpact.summary.affected_plants ?? 0} Plants {businessImpact.summary.production_stop ? "(HALT)" : ""}
                         </strong>
                       </div>
-                      <div style={{ padding: "8px 10px", background: "rgba(0,0,0,0.35)", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        <span style={{ fontSize: "10px", color: "#8e8e96", display: "block" }}>AFFECTED PRODUCTS</span>
-                        <strong style={{ fontSize: "14px", color: "#38bdf8" }}>{businessImpact.summary.affected_products ?? 0} SKUs</strong>
+                      <div style={{ padding: "8px 10px", background: "#ffffff", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                        <span style={{ fontSize: "10px", color: "#64748b", display: "block" }}>AFFECTED PRODUCTS</span>
+                        <strong style={{ fontSize: "14px", color: "#2563eb" }}>{businessImpact.summary.affected_products ?? 0} Items</strong>
                       </div>
-                      <div style={{ padding: "8px 10px", background: "rgba(0,0,0,0.35)", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        <span style={{ fontSize: "10px", color: "#8e8e96", display: "block" }}>MAX DELAY</span>
-                        <strong style={{ fontSize: "14px", color: "#f0b848" }}>+{businessImpact.summary.max_delay_days ?? 0} Days</strong>
+                      <div style={{ padding: "8px 10px", background: "#ffffff", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                        <span style={{ fontSize: "10px", color: "#64748b", display: "block" }}>ESTIMATED DELAY</span>
+                        <strong style={{ fontSize: "14px", color: "#dc2626" }}>+{businessImpact.summary.max_delay_days ?? 0} Days</strong>
                       </div>
                     </div>
                   ) : null}
 
-                  <p style={{ margin: 0, fontSize: "12px", color: "#ececef", lineHeight: 1.5 }}>
-                    {typeof businessImpact.narrative === "string"
-                      ? businessImpact.narrative
-                      : typeof businessImpact.summary === "string"
-                      ? businessImpact.summary
-                      : "Supply shock successfully evaluated against business manufacturing dependencies and inventory buffers."}
-                  </p>
+                  {/* Plain language explanation */}
+                  <div
+                    style={{
+                      padding: "10px 12px",
+                      background: businessImpact.summary?.production_stop ? "#fef2f2" : "#ffffff",
+                      borderRadius: "6px",
+                      border: `1px solid ${businessImpact.summary?.production_stop ? "#fecaca" : "#e2e8f0"}`,
+                      marginBottom: "12px",
+                      fontSize: "12.5px",
+                      color: businessImpact.summary?.production_stop ? "#991b1b" : "#334155",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    <strong>
+                      {businessImpact.summary?.production_stop
+                        ? "🚨 PRODUCTION HALT RISK: "
+                        : "⚠️ SHIPMENT DELAY ADVISORY: "}
+                    </strong>
+                    Incoming shipments from{" "}
+                    <strong>{matchedSuppliers[0]?.name || "the affected supplier"}</strong>{" "}
+                    are stalled. Because these raw material parts are delayed, your downstream manufacturing plants will suffer an estimated{" "}
+                    <strong>+{businessImpact.summary?.max_delay_days ?? 0} days delay</strong>.
+                  </div>
 
-                  {matchedSuppliers.length > 0 && (
-                    <div style={{ marginTop: "12px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                      <button
-                        className="secondary-btn"
-                        onClick={() => onNavigateToSimulator(matchedSuppliers[0]?.supplier_id || matchedSuppliers[0]?.id)}
-                        style={{
-                          padding: "6px 12px",
-                          fontSize: "11.5px",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          color: "#f0b848",
-                          borderColor: "rgba(232, 168, 56, 0.4)",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <Zap size={13} />
-                        <span>Run Full Deep-Dive Simulation</span>
-                        <ArrowRight size={12} />
-                      </button>
-                    </div>
-                  )}
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <button
+                      className="sc-primary-button"
+                      onClick={() => onNavigateToSimulator(matchedSuppliers[0]?.supplier_id || matchedSuppliers[0]?.id)}
+                      style={{
+                        padding: "8px 16px",
+                        fontSize: "12.5px",
+                        fontWeight: 600,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        background: "#2563eb",
+                        color: "#ffffff",
+                        cursor: "pointer",
+                        borderRadius: "6px",
+                      }}
+                    >
+                      <Zap size={14} />
+                      <span>Open What-If Simulator To Resolve</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

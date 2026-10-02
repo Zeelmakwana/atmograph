@@ -143,19 +143,19 @@ function getNodeIcon(type: string) {
 function getNodeColor(type: string) {
   switch (normalizeText(type)) {
     case "supplier":
-      return "#38bdf8";
+      return "#2563eb";
     case "component":
-      return "#e8a838";
+      return "#7c3aed";
     case "plant":
-      return "#f97316";
+      return "#d97706";
     case "product":
-      return "#10b981";
+      return "#16a34a";
     case "company":
-      return "#a78bfa";
+      return "#4f46e5";
     case "warehouse":
-      return "#c084fc";
+      return "#0d9488";
     default:
-      return "#94a3b8";
+      return "#64748b";
   }
 }
 
@@ -167,18 +167,18 @@ function BusinessNode({ data }: { data: any }) {
   const type = String(data?.type ?? "Entity");
   const typeColor = getNodeColor(type);
 
-  let borderStyle = selected ? "1.5px solid #e8a838" : "1px solid rgba(255, 255, 255, 0.12)";
-  let bgStyle = "rgba(18, 22, 32, 0.95)";
-  let shadowStyle = selected ? "0 0 16px rgba(232, 168, 56, 0.4)" : "0 4px 14px rgba(0, 0, 0, 0.4)";
+  let borderStyle = selected ? "2px solid #2563eb" : "1px solid #e2e8f0";
+  let bgStyle = "#ffffff";
+  let shadowStyle = selected ? "0 0 0 3px rgba(37, 99, 235, 0.2)" : "0 2px 8px rgba(15, 23, 42, 0.05)";
 
   if (failed) {
-    borderStyle = "2px solid #ef4444";
-    bgStyle = "linear-gradient(135deg, rgba(239, 68, 68, 0.28) 0%, rgba(18, 22, 32, 0.98) 100%)";
-    shadowStyle = "0 0 24px rgba(239, 68, 68, 0.5)";
+    borderStyle = "2px solid #dc2626";
+    bgStyle = "#fef2f2";
+    shadowStyle = "0 0 14px rgba(220, 38, 38, 0.25)";
   } else if (impacted) {
-    borderStyle = "2px solid #f59e0b";
-    bgStyle = "linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(18, 22, 32, 0.98) 100%)";
-    shadowStyle = "0 0 20px rgba(245, 158, 11, 0.4)";
+    borderStyle = "2px solid #d97706";
+    bgStyle = "#fffbeb";
+    shadowStyle = "0 0 14px rgba(217, 119, 6, 0.25)";
   }
 
   const subtitle =
@@ -186,7 +186,7 @@ function BusinessNode({ data }: { data: any }) {
     data?.properties?.category ||
     data?.properties?.industry ||
     data?.properties?.country ||
-    (type === "Company" ? "Enterprise Hub" : type);
+    (type === "Company" ? "Headquarters" : type);
 
   return (
     <>
@@ -195,9 +195,9 @@ function BusinessNode({ data }: { data: any }) {
         position={Position.Left}
         style={{
           background: typeColor,
-          width: 9,
-          height: 9,
-          border: "2px solid #080c14",
+          width: 10,
+          height: 10,
+          border: "2px solid #ffffff",
         }}
       />
       <div
@@ -208,7 +208,6 @@ function BusinessNode({ data }: { data: any }) {
           border: borderStyle,
           background: bgStyle,
           boxShadow: shadowStyle,
-          backdropFilter: "blur(12px)",
           transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
           cursor: "pointer",
         }}
@@ -223,17 +222,17 @@ function BusinessNode({ data }: { data: any }) {
               alignItems: "center",
               justifyContent: "center",
               background: failed
-                ? "rgba(239, 68, 68, 0.25)"
+                ? "#fee2e2"
                 : impacted
-                ? "rgba(245, 158, 11, 0.25)"
-                : `${typeColor}1f`,
-              color: failed ? "#f87171" : impacted ? "#fbbf24" : typeColor,
+                ? "#fef3c7"
+                : "#eff6ff",
+              color: failed ? "#dc2626" : impacted ? "#d97706" : typeColor,
               border: `1.5px solid ${
                 failed
-                  ? "rgba(239, 68, 68, 0.6)"
+                  ? "#fecaca"
                   : impacted
-                  ? "rgba(245, 158, 11, 0.6)"
-                  : `${typeColor}4d`
+                  ? "#fde68a"
+                  : "#bfdbfe"
               }`,
               flexShrink: 0,
             }}
@@ -245,7 +244,7 @@ function BusinessNode({ data }: { data: any }) {
             <strong
               style={{
                 display: "block",
-                color: "#f8fafc",
+                color: "#0f172a",
                 fontSize: 13,
                 fontWeight: 700,
                 lineHeight: 1.3,
@@ -261,8 +260,8 @@ function BusinessNode({ data }: { data: any }) {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 3 }}>
               <span
                 style={{
-                  fontSize: 10.5,
-                  color: "#94a3b8",
+                  fontSize: 11,
+                  color: "#64748b",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -277,21 +276,21 @@ function BusinessNode({ data }: { data: any }) {
                   fontSize: 9.5,
                   fontWeight: 700,
                   textTransform: "uppercase",
-                  letterSpacing: "0.5px",
+                  letterSpacing: "0.4px",
                   padding: "1px 6px",
                   borderRadius: "4px",
                   backgroundColor: failed
-                    ? "rgba(239, 68, 68, 0.2)"
+                    ? "#fee2e2"
                     : impacted
-                    ? "rgba(245, 158, 11, 0.2)"
-                    : `${typeColor}1a`,
-                  color: failed ? "#fca5a5" : impacted ? "#fcd34d" : typeColor,
+                    ? "#fef3c7"
+                    : "#f1f5f9",
+                  color: failed ? "#dc2626" : impacted ? "#d97706" : typeColor,
                   border: `1px solid ${
-                    failed ? "rgba(239,68,68,0.3)" : impacted ? "rgba(245,158,11,0.3)" : `${typeColor}33`
+                    failed ? "#fecaca" : impacted ? "#fde68a" : "#e2e8f0"
                   }`,
                 }}
               >
-                {failed ? "DISRUPTED" : impacted ? "IMPACTED" : type}
+                {failed ? "DELAYED" : impacted ? "AFFECTED" : type}
               </span>
             </div>
           </div>
@@ -302,9 +301,9 @@ function BusinessNode({ data }: { data: any }) {
         position={Position.Right}
         style={{
           background: typeColor,
-          width: 9,
-          height: 9,
-          border: "2px solid #080c14",
+          width: 10,
+          height: 10,
+          border: "2px solid #ffffff",
         }}
       />
     </>
@@ -658,12 +657,12 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
           type: "smoothstep",
           animated: isShockEdge,
           style: {
-            stroke: isShockEdge ? "#f59e0b" : "rgba(255, 255, 255, 0.16)",
-            strokeWidth: isShockEdge ? 2.5 : 1.4,
+            stroke: isShockEdge ? "#d97706" : "#cbd5e1",
+            strokeWidth: isShockEdge ? 2.5 : 1.5,
           },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: isShockEdge ? "#f59e0b" : "rgba(255, 255, 255, 0.4)",
+            color: isShockEdge ? "#d97706" : "#94a3b8",
             width: 14,
             height: 14,
           },
@@ -709,7 +708,7 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
         width: "100vw",
         height: "100vh",
         zIndex: 99999,
-        background: "#080a0f",
+        background: "#f8fafc",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -721,8 +720,8 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
         position: "relative",
         borderRadius: "14px",
         overflow: "hidden",
-        border: "1px solid rgba(255,255,255,0.08)",
-        background: "#080c14",
+        border: "1px solid #cbd5e1",
+        background: "#f8fafc",
         display: "flex",
         flexDirection: "column",
         flex: 1,
@@ -738,9 +737,9 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
           justifyContent: "space-between",
           gap: 12,
           padding: "10px 18px",
-          background: "rgba(14, 18, 28, 0.9)",
+          background: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(14px)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+          borderBottom: "1px solid #e2e8f0",
           zIndex: 20,
           position: "relative",
           flexWrap: "wrap",
@@ -753,24 +752,25 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
               display: "flex",
               alignItems: "center",
               gap: 8,
-              background: "#0a0d14",
-              border: "1px solid rgba(255, 255, 255, 0.14)",
+              background: "#ffffff",
+              border: "1px solid #cbd5e1",
               padding: "5px 12px",
               borderRadius: "20px",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
             }}
           >
             <Search size={14} color="#64748b" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search nodes or city..."
+              placeholder="Search suppliers, factories, parts..."
               style={{
                 background: "none",
                 border: "none",
                 outline: "none",
-                color: "#f8fafc",
-                fontSize: "12px",
-                width: "170px",
+                color: "#0f172a",
+                fontSize: "12.5px",
+                width: "190px",
               }}
             />
             {searchQuery && (
@@ -783,12 +783,12 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
             )}
           </div>
 
-          <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {[
-              { id: "all", label: "All Nodes" },
+              { id: "all", label: "All Items" },
               { id: "supplier", label: "Suppliers" },
-              { id: "component", label: "Components" },
-              { id: "plant", label: "Facilities" },
+              { id: "component", label: "Parts" },
+              { id: "plant", label: "Factories" },
               { id: "product", label: "Products" },
             ].map((tab) => {
               const active = filterType === tab.id;
@@ -798,18 +798,19 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
                   key={tab.id}
                   onClick={() => setFilterType(tab.id)}
                   style={{
-                    padding: "5px 11px",
+                    padding: "5px 12px",
                     borderRadius: "8px",
-                    fontSize: "11.5px",
+                    fontSize: "12px",
                     fontWeight: active ? 700 : 500,
-                    background: active ? "rgba(232, 168, 56, 0.18)" : "rgba(255, 255, 255, 0.04)",
-                    color: active ? "#e8a838" : "#94a3b8",
-                    border: active ? "1px solid rgba(232, 168, 56, 0.4)" : "1px solid transparent",
+                    background: active ? "#eff6ff" : "#ffffff",
+                    color: active ? "#2563eb" : "#475569",
+                    border: active ? "1px solid #2563eb" : "1px solid #cbd5e1",
+                    boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
                   }}
                 >
-                  {tab.label} <span style={{ opacity: 0.65, fontSize: "10.5px" }}>({count})</span>
+                  {tab.label} <span style={{ opacity: 0.7, fontSize: "11px" }}>({count})</span>
                 </button>
               );
             })}
@@ -822,68 +823,71 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span
                 style={{
-                  fontSize: "11px",
+                  fontSize: "11.5px",
                   fontWeight: 700,
-                  padding: "4px 8px",
+                  padding: "4px 10px",
                   borderRadius: "6px",
-                  background: "rgba(239, 68, 68, 0.18)",
-                  color: "#f87171",
-                  border: "1px solid rgba(239, 68, 68, 0.35)",
+                  background: "#fee2e2",
+                  color: "#dc2626",
+                  border: "1px solid #fecaca",
                 }}
               >
-                {impactSets.failedIds.size} Disrupted · {impactSets.impactedIds.size} Affected
+                {impactSets.failedIds.size} Delayed · {impactSets.impactedIds.size} Affected
               </span>
               <button
                 onClick={clearImpact}
                 style={{
-                  fontSize: "11px",
-                  padding: "4px 8px",
+                  fontSize: "11.5px",
+                  padding: "4px 10px",
                   borderRadius: "6px",
-                  background: "rgba(255, 255, 255, 0.06)",
-                  color: "#cbd5e1",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  background: "#f1f5f9",
+                  color: "#475569",
+                  border: "1px solid #cbd5e1",
                   cursor: "pointer",
+                  fontWeight: 500,
                 }}
               >
-                Clear Impact
+                Reset Map
               </button>
             </div>
           )}
 
           <button
             onClick={() => fitView({ padding: 0.15, duration: 400 })}
-            title="Fit Entire Graph to Screen"
+            title="Fit Entire Map to Screen"
             style={{
               display: "flex",
               alignItems: "center",
               gap: 5,
-              padding: "6px 12px",
+              padding: "6px 14px",
               borderRadius: "8px",
-              background: "rgba(255, 255, 255, 0.06)",
-              color: "#cbd5e1",
+              background: "#ffffff",
+              color: "#334155",
               fontSize: "12px",
               fontWeight: 500,
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              border: "1px solid #cbd5e1",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
               cursor: "pointer",
             }}
           >
-            <span>Center & Fit</span>
+            <span>Center Map</span>
           </button>
 
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            title={isFullscreen ? "Exit Fullscreen (Esc)" : "Maximize Fullscreen Canvas"}
+            title={isFullscreen ? "Exit Fullscreen (Esc)" : "Maximize Fullscreen"}
             style={{
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "6px 12px",
+              padding: "6px 14px",
               borderRadius: "8px",
-              background: isFullscreen ? "rgba(232, 168, 56, 0.2)" : "rgba(255, 255, 255, 0.08)",
-              color: isFullscreen ? "#e8a838" : "#f8fafc",
+              background: isFullscreen ? "#eff6ff" : "#ffffff",
+              color: isFullscreen ? "#2563eb" : "#334155",
               fontSize: "12px",
               fontWeight: 600,
-              border: isFullscreen ? "1px solid rgba(232, 168, 56, 0.4)" : "1px solid rgba(255, 255, 255, 0.15)",
+              border: isFullscreen ? "1px solid #2563eb" : "1px solid #cbd5e1",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
               cursor: "pointer",
               transition: "all 0.2s ease",
             }}
@@ -896,7 +900,7 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
             ) : (
               <>
                 <Maximize2 size={14} />
-                <span>Fullscreen Studio</span>
+                <span>Fullscreen</span>
               </>
             )}
           </button>
@@ -904,17 +908,18 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
           <button
             onClick={load}
             disabled={loading}
-            title="Reload Topology"
+            title="Reload Map"
             style={{
               display: "flex",
               alignItems: "center",
               gap: 5,
               padding: "6px 10px",
               borderRadius: "8px",
-              background: "rgba(255, 255, 255, 0.06)",
-              color: "#cbd5e1",
+              background: "#ffffff",
+              color: "#334155",
               fontSize: "12px",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              border: "1px solid #cbd5e1",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
               cursor: "pointer",
             }}
           >
@@ -1019,28 +1024,28 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
             }}
             onPaneClick={() => setSelected(null)}
           >
-            <Background color="rgba(255, 255, 255, 0.05)" gap={28} size={1} />
+            <Background color="#cbd5e1" gap={28} size={1} />
             <Controls
               style={{
-                background: "#0e121c",
-                border: "1px solid rgba(255, 255, 255, 0.12)",
+                background: "#ffffff",
+                border: "1px solid #cbd5e1",
                 borderRadius: "8px",
-                fill: "#f8fafc",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+                fill: "#334155",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
               }}
             />
             <MiniMap
               style={{
-                background: "#0a0e17",
-                border: "1px solid rgba(255, 255, 255, 0.12)",
+                background: "#ffffff",
+                border: "1px solid #cbd5e1",
                 borderRadius: "10px",
                 height: 120,
                 width: 170,
               }}
               nodeColor={(node) => {
-                if (node.data?.failed) return "#ef4444";
-                if (node.data?.impacted) return "#f59e0b";
-                return "#38bdf8";
+                if (node.data?.failed) return "#dc2626";
+                if (node.data?.impacted) return "#d97706";
+                return "#2563eb";
               }}
             />
           </ReactFlow>
@@ -1052,43 +1057,44 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
               bottom: 16,
               left: "50%",
               transform: "translateX(-50%)",
-              background: "rgba(14, 18, 28, 0.85)",
+              background: "rgba(255, 255, 255, 0.95)",
               backdropFilter: "blur(12px)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              border: "1px solid #cbd5e1",
               borderRadius: "30px",
-              padding: "6px 18px",
+              padding: "6px 20px",
               display: "flex",
               alignItems: "center",
               gap: 16,
-              fontSize: "11px",
-              color: "#94a3b8",
+              fontSize: "11.5px",
+              color: "#475569",
               zIndex: 10,
               pointerEvents: "none",
+              boxShadow: "0 2px 8px rgba(15, 23, 42, 0.06)",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#a78bfa" }} />
-              <span>Company Hub</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#4f46e5" }} />
+              <span>Headquarters</span>
             </div>
             <span>→</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#38bdf8" }} />
-              <span>Tier-1 Suppliers</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#2563eb" }} />
+              <span>Suppliers</span>
             </div>
             <span>→</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#e8a838" }} />
-              <span>Raw Materials</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#7c3aed" }} />
+              <span>Parts & Materials</span>
             </div>
             <span>→</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f97316" }} />
-              <span>Plants & Hubs</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#d97706" }} />
+              <span>Factories</span>
             </div>
             <span>→</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981" }} />
-              <span>Finished SKUs</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#16a34a" }} />
+              <span>Finished Products</span>
             </div>
           </div>
         </div>
@@ -1107,29 +1113,28 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
             zIndex: 35,
             padding: 20,
             borderRadius: 14,
-            background: "rgba(14, 18, 28, 0.97)",
-            border: "1px solid rgba(232, 168, 56, 0.3)",
-            boxShadow: "0 24px 48px rgba(0,0,0,0.7), 0 0 20px rgba(232, 168, 56, 0.15)",
-            backdropFilter: "blur(20px)",
+            background: "#ffffff",
+            border: "1px solid #cbd5e1",
+            boxShadow: "0 12px 32px rgba(15, 23, 42, 0.12)",
           }}
         >
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
             <div>
               <span
                 style={{
-                  fontSize: "10px",
+                  fontSize: "10.5px",
                   fontWeight: 700,
                   textTransform: "uppercase",
-                  padding: "2px 8px",
+                  padding: "3px 8px",
                   borderRadius: "6px",
-                  background: "rgba(232, 168, 56, 0.15)",
-                  color: "#e8a838",
-                  border: "1px solid rgba(232, 168, 56, 0.3)",
+                  background: "#eff6ff",
+                  color: "#2563eb",
+                  border: "1px solid #bfdbfe",
                 }}
               >
                 {selected.type}
               </span>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: "#f8fafc", margin: "6px 0 0 0" }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0f172a", margin: "6px 0 0 0" }}>
                 {selected.name}
               </h3>
             </div>
@@ -1139,12 +1144,12 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                background: "rgba(255,255,255,0.06)",
+                background: "#f1f5f9",
                 border: "none",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#94a3b8",
+                color: "#64748b",
                 cursor: "pointer",
               }}
             >
@@ -1161,11 +1166,11 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
                 padding: "10px",
                 marginBottom: 16,
                 borderRadius: "8px",
-                background: "rgba(239, 68, 68, 0.18)",
-                border: "1px solid rgba(239, 68, 68, 0.4)",
-                color: "#f87171",
-                fontSize: "12px",
-                fontWeight: 700,
+                background: "#fee2e2",
+                border: "1px solid #fecaca",
+                color: "#dc2626",
+                fontSize: "12.5px",
+                fontWeight: 600,
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
@@ -1174,7 +1179,7 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
               }}
             >
               <Zap size={14} />
-              <span>Simulate Disruption on this Supplier</span>
+              <span>Test Delay on this Supplier</span>
             </button>
           )}
 
@@ -1185,17 +1190,17 @@ function SupplyGraphInternal({ graphId: _graphId }: SupplyGraphProps) {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  padding: "7px 0",
-                  borderBottom: "1px solid rgba(255,255,255,0.05)",
-                  fontSize: "12px",
+                  padding: "8px 0",
+                  borderBottom: "1px solid #e2e8f0",
+                  fontSize: "12.5px",
                 }}
               >
-                <span style={{ color: "#94a3b8", textTransform: "capitalize" }}>
+                <span style={{ color: "#64748b", textTransform: "capitalize" }}>
                   {key.replace(/_/g, " ")}
                 </span>
                 <strong
                   style={{
-                    color: "#f8fafc",
+                    color: "#0f172a",
                     textAlign: "right",
                     maxWidth: 180,
                     wordBreak: "break-word",

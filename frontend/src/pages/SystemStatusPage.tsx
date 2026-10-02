@@ -60,20 +60,20 @@ export default function SystemStatusPage() {
       {/* Header */}
       <div className="page-header-row">
         <div className="page-headline">
-          <span className="eyebrow-tag">INFRASTRUCTURE & CONFIGURATION</span>
-          <h2>System Intelligence & Control Center</h2>
+          <span className="eyebrow-tag">SYSTEM HEALTH</span>
+          <h2>System Status & Settings</h2>
           <p>
-            Real-time health verification for FastAPI backend, SQLite operational database, Neo4j knowledge graph, PyTorch GNN, spaCy NLP, and live disruption monitors.
+            Check that all parts of your system are connected and running smoothly (backend server, database, supply map, and AI models).
           </p>
         </div>
 
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <div style={{ display: "flex", background: "rgba(255, 255, 255, 0.05)", borderRadius: "8px", padding: "3px" }}>
+          <div style={{ display: "flex", background: "#f1f5f9", borderRadius: "8px", padding: "3px", border: "1px solid #cbd5e1" }}>
             <button
               className={`tab-btn ${activeSubTab === "diagnostics" ? "active" : ""}`}
               style={{
-                background: activeSubTab === "diagnostics" ? "rgba(232, 168, 56, 0.15)" : "transparent",
-                color: activeSubTab === "diagnostics" ? "#e8a838" : "#8e8e96",
+                background: activeSubTab === "diagnostics" ? "#2563eb" : "transparent",
+                color: activeSubTab === "diagnostics" ? "#ffffff" : "#64748b",
                 border: "none",
                 borderRadius: "6px",
                 padding: "6px 14px",
@@ -87,13 +87,13 @@ export default function SystemStatusPage() {
               onClick={() => setActiveSubTab("diagnostics")}
             >
               <Activity size={14} />
-              Diagnostics
+              System Health
             </button>
             <button
               className={`tab-btn ${activeSubTab === "settings" ? "active" : ""}`}
               style={{
-                background: activeSubTab === "settings" ? "rgba(232, 168, 56, 0.15)" : "transparent",
-                color: activeSubTab === "settings" ? "#e8a838" : "#8e8e96",
+                background: activeSubTab === "settings" ? "#2563eb" : "transparent",
+                color: activeSubTab === "settings" ? "#ffffff" : "#64748b",
                 border: "none",
                 borderRadius: "6px",
                 padding: "6px 14px",
@@ -107,13 +107,18 @@ export default function SystemStatusPage() {
               onClick={() => setActiveSubTab("settings")}
             >
               <SlidersHorizontal size={14} />
-              Preferences
+              Settings
             </button>
           </div>
 
           {activeSubTab === "diagnostics" && (
-            <button className="secondary-button" onClick={checkHealth} disabled={loading}>
-              <RefreshCw size={14} className={loading ? "sc-spin" : ""} />
+            <button
+              className="secondary-button"
+              onClick={checkHealth}
+              disabled={loading}
+              style={{ background: "#ffffff", border: "1px solid #cbd5e1", color: "#0f172a" }}
+            >
+              <RefreshCw size={14} className={loading ? "sc-spin" : ""} color="#2563eb" />
               {loading ? "Checking..." : "Re-Check Status"}
             </button>
           )}
@@ -129,8 +134,8 @@ export default function SystemStatusPage() {
             style={{
               padding: "16px 20px",
               borderRadius: "12px",
-              background: isHealthy ? "rgba(61, 214, 140, 0.08)" : "rgba(232, 168, 56, 0.08)",
-              border: `1px solid ${isHealthy ? "rgba(61, 214, 140, 0.25)" : "rgba(232, 168, 56, 0.25)"}`,
+              background: isHealthy ? "rgba(22, 163, 74, 0.08)" : "rgba(217, 119, 6, 0.08)",
+              border: `1px solid ${isHealthy ? "#bbf7d0" : "#fde68a"}`,
               marginBottom: "20px",
               display: "flex",
               alignItems: "center",
@@ -139,16 +144,16 @@ export default function SystemStatusPage() {
           >
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               {isHealthy ? (
-                <CheckCircle2 size={24} style={{ color: "#3dd68c" }} />
+                <CheckCircle2 size={24} style={{ color: "#16a34a" }} />
               ) : (
-                <AlertTriangle size={24} style={{ color: "#e8a838" }} />
+                <AlertTriangle size={24} style={{ color: "#d97706" }} />
               )}
               <div>
-                <strong style={{ fontSize: "15px", color: "#ececef" }}>
-                  Platform Health: {isHealthy ? "All Primary Systems Operational" : "Operating in Resilient Mode"}
+                <strong style={{ fontSize: "15px", color: "#0f172a" }}>
+                  Platform Health: {isHealthy ? "All Primary Systems Working Properly" : "Running in Backup Mode"}
                 </strong>
-                <p style={{ margin: "3px 0 0", fontSize: "12px", color: "#8e8e96" }}>
-                  Mohilya Couture Surat Unit P001 supply network intelligence active · Multi-tier BOM loaded · Graph fallback enabled
+                <p style={{ margin: "3px 0 0", fontSize: "12px", color: "#64748b" }}>
+                  Active supply chain map and databases are connected and ready for testing.
                 </p>
               </div>
             </div>
@@ -158,8 +163,9 @@ export default function SystemStatusPage() {
                 fontWeight: 700,
                 padding: "5px 12px",
                 borderRadius: "20px",
-                background: isHealthy ? "rgba(61, 214, 140, 0.15)" : "rgba(232, 168, 56, 0.15)",
-                color: isHealthy ? "#3dd68c" : "#e8a838",
+                background: "#ffffff",
+                border: "1px solid #cbd5e1",
+                color: "#0f172a",
               }}
             >
               VERSION {backendStatus?.version || "1.0.0"}
@@ -177,18 +183,18 @@ export default function SystemStatusPage() {
                       width: 36,
                       height: 36,
                       borderRadius: "8px",
-                      background: "rgba(61, 214, 140, 0.1)",
+                      background: "rgba(22, 163, 74, 0.1)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "#3dd68c",
+                      color: "#16a34a",
                     }}
                   >
                     <Server size={18} />
                   </div>
                   <div>
-                    <strong style={{ fontSize: "14px", color: "#ececef" }}>FastAPI Gateway</strong>
-                    <div style={{ fontSize: "11px", color: "#8e8e96" }}>REST API Core (Port 8000)</div>
+                    <strong style={{ fontSize: "14px", color: "#0f172a" }}>Backend Server</strong>
+                    <div style={{ fontSize: "11px", color: "#64748b" }}>FastAPI REST API (Port 8000)</div>
                   </div>
                 </div>
                 <span className={`health-status-badge ${backendStatus?.status ? "online" : "offline"}`}>
@@ -196,10 +202,10 @@ export default function SystemStatusPage() {
                 </span>
               </div>
 
-              <div style={{ fontSize: "12px", color: "#8e8e96", lineHeight: 1.6 }}>
+              <div style={{ fontSize: "12px", color: "#475569", lineHeight: 1.6 }}>
                 <div>Status: {diag.api?.status ?? "active"} · Version: {backendStatus?.version ?? "1.0.0"}</div>
-                <div>CORS: http://localhost:5173 · WebSockets: /ws/updates</div>
-                <div>Registered: 17 API Routers (Supply Chain, Intelligence, GNN, NLP)</div>
+                <div>Connected to frontend at localhost</div>
+                <div>Active features: Supply Chain, Alerts, AI Simulation</div>
               </div>
             </div>
 
@@ -212,31 +218,31 @@ export default function SystemStatusPage() {
                       width: 36,
                       height: 36,
                       borderRadius: "8px",
-                      background: "rgba(232, 168, 56, 0.1)",
+                      background: "rgba(37, 99, 235, 0.1)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "#e8a838",
+                      color: "#2563eb",
                     }}
                   >
                     <Database size={18} />
                   </div>
                   <div>
-                    <strong style={{ fontSize: "14px", color: "#ececef" }}>SQLite Business DB</strong>
-                    <div style={{ fontSize: "11px", color: "#8e8e96" }}>atmograph.db</div>
+                    <strong style={{ fontSize: "14px", color: "#0f172a" }}>Main Database</strong>
+                    <div style={{ fontSize: "11px", color: "#64748b" }}>SQLite (atmograph.db)</div>
                   </div>
                 </div>
                 <span className="health-status-badge online">CONNECTED</span>
               </div>
 
-              <div style={{ fontSize: "12px", color: "#8e8e96", lineHeight: 1.6 }}>
+              <div style={{ fontSize: "12px", color: "#475569", lineHeight: 1.6 }}>
                 <div>Tables: {Object.keys(dbCounts).length > 0 ? Object.keys(dbCounts).length : 16} active · Total Records: {totalDbRows > 0 ? totalDbRows : "85+"}</div>
-                <div>Suppliers: {dbCounts.sc_suppliers ?? 8} · Products: {dbCounts.sc_products ?? 8} · Components: {dbCounts.sc_components ?? 13}</div>
+                <div>Suppliers: {dbCounts.sc_suppliers ?? 8} · Products: {dbCounts.sc_products ?? 8} · Parts: {dbCounts.sc_components ?? 13}</div>
                 <div>Allocations: {dbCounts.sc_supply_allocations ?? 15} · Stock Buffers: {dbCounts.sc_inventory ?? 19}</div>
               </div>
             </div>
 
-            {/* 3. Neo4j Knowledge Graph */}
+            {/* 3. Supply Chain Map Engine */}
             <div className="modern-card">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -245,35 +251,35 @@ export default function SystemStatusPage() {
                       width: 36,
                       height: 36,
                       borderRadius: "8px",
-                      background: neo4jOnline ? "rgba(155, 140, 255, 0.1)" : "rgba(232, 168, 56, 0.1)",
+                      background: "rgba(124, 58, 237, 0.1)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: neo4jOnline ? "#9b8cff" : "#e8a838",
+                      color: "#7c3aed",
                     }}
                   >
                     <Network size={18} />
                   </div>
                   <div>
-                    <strong style={{ fontSize: "14px", color: "#ececef" }}>Graph Topology Engine</strong>
-                    <div style={{ fontSize: "11px", color: "#8e8e96" }}>
-                      {neo4jOnline ? "Neo4j Bolt Connected" : "SQLite In-Memory Graph Active"}
+                    <strong style={{ fontSize: "14px", color: "#0f172a" }}>Supply Chain Map Engine</strong>
+                    <div style={{ fontSize: "11px", color: "#64748b" }}>
+                      {neo4jOnline ? "Neo4j Graph Database Connected" : "Local Map Graph Active"}
                     </div>
                   </div>
                 </div>
-                <span className={`health-status-badge ${neo4jOnline ? "online" : "online"}`}>
-                  {neo4jOnline ? "NEO4J ONLINE" : "RESILIENT FALLBACK"}
+                <span className="health-status-badge online">
+                  {neo4jOnline ? "CONNECTED" : "READY"}
                 </span>
               </div>
 
-              <div style={{ fontSize: "12px", color: "#8e8e96", lineHeight: 1.6 }}>
-                <div>Nodes: {graphStats?.nodes || 30}+ · Relationships: {graphStats?.relationships || 45}+</div>
-                <div>Driver: {neo4jOnline ? "Neo4j Cypher bolt://localhost:7687" : "SQLite Relation Graph Traversal"}</div>
-                <div>Status: High-availability mode · Zero downtime guaranteed</div>
+              <div style={{ fontSize: "12px", color: "#475569", lineHeight: 1.6 }}>
+                <div>Map Points: {graphStats?.nodes || 30}+ · Connections: {graphStats?.relationships || 45}+</div>
+                <div>Connection: {neo4jOnline ? "Neo4j Graph Driver" : "Local Fast Memory"}</div>
+                <div>Status: Ready for interactive map browsing</div>
               </div>
             </div>
 
-            {/* 4. PyTorch Geometric GNN */}
+            {/* 4. AI Prediction Model */}
             <div className="modern-card">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -282,33 +288,33 @@ export default function SystemStatusPage() {
                       width: 36,
                       height: 36,
                       borderRadius: "8px",
-                      background: "rgba(56, 189, 248, 0.1)",
+                      background: "rgba(14, 165, 233, 0.1)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "#38bdf8",
+                      color: "#0284c7",
                     }}
                   >
                     <Cpu size={18} />
                   </div>
                   <div>
-                    <strong style={{ fontSize: "14px", color: "#ececef" }}>PyTorch Geometric GNN</strong>
-                    <div style={{ fontSize: "11px", color: "#8e8e96" }}>Ripple Prediction Weights</div>
+                    <strong style={{ fontSize: "14px", color: "#0f172a" }}>AI Prediction Model</strong>
+                    <div style={{ fontSize: "11px", color: "#64748b" }}>Neural Network Delay Calculator</div>
                   </div>
                 </div>
-                <span className={`health-status-badge ${gnnOnline ? "online" : "online"}`}>
-                  {gnnOnline ? "MODEL LOADED" : "HEURISTIC HYBRID"}
+                <span className="health-status-badge online">
+                  {gnnOnline ? "READY" : "ACTIVE"}
                 </span>
               </div>
 
-              <div style={{ fontSize: "12px", color: "#8e8e96", lineHeight: 1.6 }}>
-                <div>Model: atmograph_gnn.pt (PyG GraphConv / GAT)</div>
-                <div>Prediction Mode: Multi-hop Cascade & Graph Ripple</div>
-                <div>Status: Weights initialized & cached for sub-second inference</div>
+              <div style={{ fontSize: "12px", color: "#475569", lineHeight: 1.6 }}>
+                <div>Model: Supply Chain Impact Predictor</div>
+                <div>Mode: Multi-tier cascade calculations</div>
+                <div>Status: Loaded in memory for fast calculations</div>
               </div>
             </div>
 
-            {/* 5. spaCy NLP Pipeline */}
+            {/* 5. News Text Reader */}
             <div className="modern-card">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -321,27 +327,27 @@ export default function SystemStatusPage() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "#a855f7",
+                      color: "#9333ea",
                     }}
                   >
                     <Sparkles size={18} />
                   </div>
                   <div>
-                    <strong style={{ fontSize: "14px", color: "#ececef" }}>spaCy NLP Engine</strong>
-                    <div style={{ fontSize: "11px", color: "#8e8e96" }}>Disruption Entity Extraction</div>
+                    <strong style={{ fontSize: "14px", color: "#0f172a" }}>News Text Reader</strong>
+                    <div style={{ fontSize: "11px", color: "#64748b" }}>spaCy Natural Language Engine</div>
                   </div>
                 </div>
                 <span className="health-status-badge online">ONLINE</span>
               </div>
 
-              <div style={{ fontSize: "12px", color: "#8e8e96", lineHeight: 1.6 }}>
-                <div>Pipeline: en_core_web_sm / Regex Hybrid Entity Extractor</div>
-                <div>Extractors: Ports, Suppliers, Disruption Severity, Locations</div>
-                <div>Speed: ~8ms latency per news article batch</div>
+              <div style={{ fontSize: "12px", color: "#475569", lineHeight: 1.6 }}>
+                <div>Function: Finds supplier names, cities, and ports in text</div>
+                <div>Speed: ~8ms per article check</div>
+                <div>Status: Ready for incoming alerts</div>
               </div>
             </div>
 
-            {/* 6. Live News Monitor */}
+            {/* 6. Live Alert Monitor */}
             <div className="modern-card">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -350,27 +356,27 @@ export default function SystemStatusPage() {
                       width: 36,
                       height: 36,
                       borderRadius: "8px",
-                      background: "rgba(232, 116, 97, 0.1)",
+                      background: "rgba(234, 88, 12, 0.1)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "#e87461",
+                      color: "#ea580c",
                     }}
                   >
                     <Radio size={18} />
                   </div>
                   <div>
-                    <strong style={{ fontSize: "14px", color: "#ececef" }}>Live Disruption Monitor</strong>
-                    <div style={{ fontSize: "11px", color: "#8e8e96" }}>Continuous RSS & Feed Polling</div>
+                    <strong style={{ fontSize: "14px", color: "#0f172a" }}>Live Alert Monitor</strong>
+                    <div style={{ fontSize: "11px", color: "#64748b" }}>Continuous News & Event Poller</div>
                   </div>
                 </div>
                 <span className="health-status-badge online">ACTIVE</span>
               </div>
 
-              <div style={{ fontSize: "12px", color: "#8e8e96", lineHeight: 1.6 }}>
-                <div>Interval: {diag.live_news_monitor?.interval_seconds ?? 300}s check cycle</div>
-                <div>Automated Simulation: Enabled on high-confidence signals</div>
-                <div>Feed: Global maritime, port strike & supply disruption feeds</div>
+              <div style={{ fontSize: "12px", color: "#475569", lineHeight: 1.6 }}>
+                <div>Check Interval: Every {diag.live_news_monitor?.interval_seconds ?? 300} seconds</div>
+                <div>Auto Test: Enabled for high-risk delays</div>
+                <div>Status: Listening for global shipping & weather events</div>
               </div>
             </div>
           </div>

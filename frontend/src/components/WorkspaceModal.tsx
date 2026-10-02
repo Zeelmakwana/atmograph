@@ -164,10 +164,10 @@ export default function WorkspaceModal({
         style={{
           width: "100%",
           maxWidth: "680px",
-          backgroundColor: "#12141a",
+          backgroundColor: "#ffffff",
           borderRadius: "16px",
-          border: "1px solid rgba(232, 168, 56, 0.25)",
-          boxShadow: "0 28px 60px rgba(0, 0, 0, 0.8), 0 0 20px rgba(232, 168, 56, 0.08)",
+          border: "1px solid #cbd5e1",
+          boxShadow: "0 20px 40px rgba(0, 0, 0, 0.12)",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
@@ -178,11 +178,11 @@ export default function WorkspaceModal({
         <div
           style={{
             padding: "20px 24px",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+            borderBottom: "1px solid #e2e8f0",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            background: "linear-gradient(180deg, rgba(232, 168, 56, 0.06) 0%, transparent 100%)",
+            background: "#f8fafc",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -191,20 +191,20 @@ export default function WorkspaceModal({
                 width: "42px",
                 height: "42px",
                 borderRadius: "10px",
-                backgroundColor: "rgba(232, 168, 56, 0.15)",
+                backgroundColor: "rgba(37, 99, 235, 0.1)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#e8a838",
-                border: "1px solid rgba(232, 168, 56, 0.3)",
+                color: "#2563eb",
+                border: "1px solid rgba(37, 99, 235, 0.2)",
               }}
             >
               <Building2 size={22} />
             </div>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "#f8fafc" }}>
-                  My Business Workspace
+                <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "#0f172a" }}>
+                  My Company Workspaces
                 </h3>
                 <span
                   style={{
@@ -213,20 +213,20 @@ export default function WorkspaceModal({
                     gap: "4px",
                     padding: "2px 8px",
                     borderRadius: "6px",
-                    backgroundColor: "rgba(74, 222, 128, 0.15)",
-                    border: "1px solid rgba(74, 222, 128, 0.3)",
-                    color: "#4ade80",
-                    fontSize: "10px",
+                    backgroundColor: "#dcfce7",
+                    border: "1px solid #bbf7d0",
+                    color: "#16a34a",
+                    fontSize: "11px",
                     fontWeight: 700,
                     textTransform: "uppercase",
                     letterSpacing: "0.5px",
                   }}
                 >
-                  <Lock size={10} /> Private & Tenant Isolated
+                  <Lock size={10} /> Private & Secure
                 </span>
               </div>
-              <p style={{ margin: "3px 0 0 0", fontSize: "12px", color: "#94a3b8" }}>
-                Complete data privacy active. Strictly isolated to your company account.
+              <p style={{ margin: "3px 0 0 0", fontSize: "12px", color: "#64748b" }}>
+                Only your account has access to this data.
               </p>
             </div>
           </div>
@@ -234,9 +234,9 @@ export default function WorkspaceModal({
           <button
             onClick={onClose}
             style={{
-              background: "rgba(255, 255, 255, 0.05)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              color: "#94a3b8",
+              background: "#f1f5f9",
+              border: "1px solid #cbd5e1",
+              color: "#64748b",
               cursor: "pointer",
               padding: "6px",
               borderRadius: "8px",
@@ -254,18 +254,18 @@ export default function WorkspaceModal({
         <div
           style={{
             padding: "10px 24px",
-            backgroundColor: "rgba(74, 222, 128, 0.06)",
-            borderBottom: "1px solid rgba(74, 222, 128, 0.15)",
+            backgroundColor: "rgba(22, 163, 74, 0.08)",
+            borderBottom: "1px solid #bbf7d0",
             display: "flex",
             alignItems: "center",
             gap: "10px",
-            fontSize: "11.5px",
-            color: "#86efac",
+            fontSize: "12px",
+            color: "#166534",
           }}
         >
-          <ShieldCheck size={16} color="#4ade80" style={{ flexShrink: 0 }} />
+          <ShieldCheck size={16} color="#16a34a" style={{ flexShrink: 0 }} />
           <div>
-            <strong>Strict Privacy Active:</strong> You can only view and manage your own enterprise assets. Other businesses cannot see or access your supply chain topology.
+            <strong>Strict Privacy Active:</strong> You can only see and manage your own company's suppliers and factories.
           </div>
         </div>
 
@@ -275,8 +275,8 @@ export default function WorkspaceModal({
             display: "flex",
             padding: "10px 24px",
             gap: "10px",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-            backgroundColor: "#0d0f14",
+            borderBottom: "1px solid #e2e8f0",
+            backgroundColor: "#f8fafc",
           }}
         >
           <button
@@ -291,8 +291,8 @@ export default function WorkspaceModal({
               cursor: "pointer",
               fontSize: "12.5px",
               fontWeight: 600,
-              backgroundColor: viewMode === "overview" ? "rgba(232, 168, 56, 0.18)" : "transparent",
-              color: viewMode === "overview" ? "#e8a838" : "#94a3b8",
+              backgroundColor: viewMode === "overview" ? "#2563eb" : "transparent",
+              color: viewMode === "overview" ? "#ffffff" : "#64748b",
               display: "flex",
               alignItems: "center",
               gap: "6px",
@@ -300,7 +300,7 @@ export default function WorkspaceModal({
             }}
           >
             <Layers size={14} />
-            <span>Active Enterprise Workspace</span>
+            <span>Active Companies</span>
           </button>
 
           <button
@@ -315,8 +315,8 @@ export default function WorkspaceModal({
               cursor: "pointer",
               fontSize: "12.5px",
               fontWeight: 600,
-              backgroundColor: viewMode === "register" ? "rgba(74, 222, 128, 0.15)" : "transparent",
-              color: viewMode === "register" ? "#4ade80" : "#94a3b8",
+              backgroundColor: viewMode === "register" ? "#2563eb" : "transparent",
+              color: viewMode === "register" ? "#ffffff" : "#64748b",
               display: "flex",
               alignItems: "center",
               gap: "6px",
@@ -324,7 +324,7 @@ export default function WorkspaceModal({
             }}
           >
             <Plus size={14} />
-            <span>+ Add Subsidiary / Branch</span>
+            <span>+ Add New Branch</span>
           </button>
         </div>
 
@@ -336,9 +336,9 @@ export default function WorkspaceModal({
                 marginBottom: "16px",
                 padding: "12px 14px",
                 borderRadius: "8px",
-                backgroundColor: "rgba(239, 68, 68, 0.15)",
-                border: "1px solid rgba(239, 68, 68, 0.3)",
-                color: "#f87171",
+                backgroundColor: "#fef2f2",
+                border: "1px solid #fecaca",
+                color: "#b91c1c",
                 fontSize: "12.5px",
               }}
             >
@@ -352,32 +352,32 @@ export default function WorkspaceModal({
                 marginBottom: "16px",
                 padding: "12px 14px",
                 borderRadius: "8px",
-                backgroundColor: "rgba(74, 222, 128, 0.15)",
-                border: "1px solid rgba(74, 222, 128, 0.3)",
-                color: "#4ade80",
+                backgroundColor: "#f0fdf4",
+                border: "1px solid #bbf7d0",
+                color: "#166534",
                 fontSize: "12.5px",
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
               }}
             >
-              <CheckCircle2 size={16} />
+              <CheckCircle2 size={16} color="#16a34a" />
               <span>{successMsg}</span>
             </div>
           )}
 
           {viewMode === "overview" && (
             <div>
-              <div style={{ marginBottom: "16px", fontSize: "12px", color: "#94a3b8", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ marginBottom: "16px", fontSize: "12px", color: "#64748b", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span>Your private workspaces ({data?.workspaces?.length ?? 1}):</span>
-                <span style={{ color: "#4ade80", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                  <ShieldCheck size={13} /> Zero Cross-Tenant Leakage
+                <span style={{ color: "#16a34a", display: "inline-flex", alignItems: "center", gap: "4px", fontWeight: 600 }}>
+                  <ShieldCheck size={13} /> Complete Data Protection
                 </span>
               </div>
 
               {loading ? (
-                <div style={{ textAlign: "center", padding: "40px", color: "#94a3b8" }}>
-                  <Loader2 size={24} className="spin" style={{ marginBottom: "10px", color: "#e8a838" }} />
+                <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
+                  <Loader2 size={24} className="sc-spin" style={{ marginBottom: "10px", color: "#2563eb" }} />
                   <div>Loading your business workspace...</div>
                 </div>
               ) : (
@@ -391,16 +391,16 @@ export default function WorkspaceModal({
                           padding: "18px",
                           borderRadius: "12px",
                           border: ws.is_active
-                            ? "1.5px solid rgba(232, 168, 56, 0.5)"
-                            : "1px solid rgba(255, 255, 255, 0.08)",
+                            ? "2px solid #2563eb"
+                            : "1px solid #e2e8f0",
                           backgroundColor: ws.is_active
-                            ? "rgba(232, 168, 56, 0.06)"
-                            : "rgba(255, 255, 255, 0.02)",
+                            ? "#ffffff"
+                            : "#f8fafc",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "space-between",
                           gap: "16px",
-                          boxShadow: ws.is_active ? "0 4px 20px rgba(232, 168, 56, 0.1)" : "none",
+                          boxShadow: ws.is_active ? "0 4px 12px rgba(37, 99, 235, 0.08)" : "none",
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: "14px", flex: 1 }}>
@@ -410,16 +410,15 @@ export default function WorkspaceModal({
                               height: "48px",
                               borderRadius: "12px",
                               backgroundColor: ws.is_active
-                                ? "rgba(232, 168, 56, 0.2)"
-                                : "rgba(255, 255, 255, 0.06)",
-                              color: ws.is_active ? "#e8a838" : "#f8fafc",
+                                ? "rgba(37, 99, 235, 0.1)"
+                                : "#e2e8f0",
+                              color: ws.is_active ? "#2563eb" : "#475569",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                               fontWeight: 800,
                               fontSize: "16px",
                               flexShrink: 0,
-                              border: ws.is_active ? "1px solid rgba(232, 168, 56, 0.4)" : "none",
                             }}
                           >
                             {ws.badge}
@@ -427,7 +426,7 @@ export default function WorkspaceModal({
 
                           <div style={{ flex: 1 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                              <strong style={{ color: "#f8fafc", fontSize: "15px" }}>
+                              <strong style={{ color: "#0f172a", fontSize: "15px" }}>
                                 {ws.company_name}
                               </strong>
                               {ws.is_active && (
@@ -436,24 +435,24 @@ export default function WorkspaceModal({
                                     fontSize: "10px",
                                     padding: "2px 8px",
                                     borderRadius: "999px",
-                                    backgroundColor: "rgba(74, 222, 128, 0.2)",
-                                    border: "1px solid rgba(74, 222, 128, 0.4)",
-                                    color: "#4ade80",
+                                    backgroundColor: "#dcfce7",
+                                    border: "1px solid #bbf7d0",
+                                    color: "#16a34a",
                                     fontWeight: 700,
                                     textTransform: "uppercase",
                                     letterSpacing: "0.5px",
                                   }}
                                 >
-                                  Active Business
+                                  Current Company
                                 </span>
                               )}
                             </div>
 
-                            <div style={{ fontSize: "12px", color: "#e8a838", marginTop: "3px", fontWeight: 500 }}>
+                            <div style={{ fontSize: "12px", color: "#2563eb", marginTop: "3px", fontWeight: 600 }}>
                               {ws.industry} · {ws.location || "Verified Facility"}
                             </div>
 
-                            <p style={{ margin: "5px 0 0 0", fontSize: "11.5px", color: "#94a3b8", lineHeight: 1.4 }}>
+                            <p style={{ margin: "5px 0 0 0", fontSize: "12px", color: "#64748b", lineHeight: 1.4 }}>
                               {ws.description}
                             </p>
 
@@ -462,24 +461,24 @@ export default function WorkspaceModal({
                                 display: "flex",
                                 gap: "14px",
                                 marginTop: "10px",
-                                fontSize: "11.5px",
-                                color: "#f8fafc",
+                                fontSize: "12px",
+                                color: "#0f172a",
                                 flexWrap: "wrap",
                               }}
                             >
                               <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                                <Truck size={13} color="#e8a838" />
+                                <Truck size={13} color="#2563eb" />
                                 <strong>{ws.suppliers_count}</strong> Suppliers
                               </span>
                               <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                                <Factory size={13} color="#e8a838" />
-                                <strong>{ws.plants_count}</strong> Processing Units
+                                <Factory size={13} color="#2563eb" />
+                                <strong>{ws.plants_count}</strong> Factories
                               </span>
                               {ws.owner_name && (
-                                <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#94a3b8" }}>
-                                  <User size={13} />
-                                  {ws.owner_name}
-                                </span>
+                                <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#64748b" }}>
+                                <User size={13} />
+                                {ws.owner_name}
+                              </span>
                               )}
                             </div>
                           </div>
@@ -491,9 +490,9 @@ export default function WorkspaceModal({
                               style={{
                                 padding: "8px 14px",
                                 borderRadius: "8px",
-                                border: "1px solid rgba(74, 222, 128, 0.4)",
-                                backgroundColor: "rgba(74, 222, 128, 0.12)",
-                                color: "#4ade80",
+                                border: "1px solid #bbf7d0",
+                                backgroundColor: "#dcfce7",
+                                color: "#16a34a",
                                 fontSize: "12px",
                                 fontWeight: 700,
                                 display: "flex",
@@ -511,9 +510,9 @@ export default function WorkspaceModal({
                               style={{
                                 padding: "8px 16px",
                                 borderRadius: "8px",
-                                border: "1px solid rgba(255, 255, 255, 0.15)",
-                                backgroundColor: "rgba(255, 255, 255, 0.08)",
-                                color: "#ececef",
+                                border: "none",
+                                backgroundColor: "#2563eb",
+                                color: "#ffffff",
                                 fontSize: "12px",
                                 fontWeight: 600,
                                 display: "flex",
@@ -525,12 +524,12 @@ export default function WorkspaceModal({
                             >
                               {isBusy ? (
                                 <>
-                                  <Loader2 size={14} className="spin" />
+                                  <Loader2 size={14} className="sc-spin" />
                                   <span>Loading...</span>
                                 </>
                               ) : (
                                 <>
-                                  <span>Switch to Entity</span>
+                                  <span>Switch to This Company</span>
                                   <ChevronRight size={14} />
                                 </>
                               )}
@@ -547,28 +546,28 @@ export default function WorkspaceModal({
 
           {viewMode === "register" && (
             <form onSubmit={handleRegister}>
-              <div style={{ marginBottom: "16px", fontSize: "12px", color: "#94a3b8" }}>
-                Add another operating division, subsidiary, or regional workspace under your account. All branches remain strictly private to your company login.
+              <div style={{ marginBottom: "16px", fontSize: "12px", color: "#64748b" }}>
+                Add another business, subsidiary, or regional branch. Each company stays private to your account.
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#f8fafc", marginBottom: "6px" }}>
-                    Company / Branch / Division Name *
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                    Company / Branch Name *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Mohilya Textiles Export Division or Western Hub"
+                    placeholder="e.g. My Business Second Branch"
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
                     style={{
                       width: "100%",
                       padding: "10px 14px",
                       borderRadius: "8px",
-                      backgroundColor: "rgba(255, 255, 255, 0.05)",
-                      border: "1px solid rgba(255, 255, 255, 0.15)",
-                      color: "#ececef",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #cbd5e1",
+                      color: "#0f172a",
                       fontSize: "13px",
                       outline: "none",
                       boxSizing: "border-box",
@@ -577,22 +576,22 @@ export default function WorkspaceModal({
                 </div>
 
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#f8fafc", marginBottom: "6px" }}>
-                    Industry Sector *
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                    Industry *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Textiles, Attar & Fragrance, FMCG, Electronics, Apparel"
+                    placeholder="e.g. Manufacturing, Retail, Food, Fashion"
                     value={regIndustry}
                     onChange={(e) => setRegIndustry(e.target.value)}
                     style={{
                       width: "100%",
                       padding: "10px 14px",
                       borderRadius: "8px",
-                      backgroundColor: "rgba(255, 255, 255, 0.05)",
-                      border: "1px solid rgba(255, 255, 255, 0.15)",
-                      color: "#ececef",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #cbd5e1",
+                      color: "#0f172a",
                       fontSize: "13px",
                       outline: "none",
                       boxSizing: "border-box",
@@ -602,21 +601,21 @@ export default function WorkspaceModal({
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                   <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#f8fafc", marginBottom: "6px" }}>
-                      Division Lead / Manager
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      Manager Name
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Lead Officer"
+                      placeholder="e.g. Operations Manager"
                       value={regOwner}
                       onChange={(e) => setRegOwner(e.target.value)}
                       style={{
                         width: "100%",
                         padding: "10px 14px",
                         borderRadius: "8px",
-                        backgroundColor: "rgba(255, 255, 255, 0.05)",
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
-                        color: "#ececef",
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #cbd5e1",
+                        color: "#0f172a",
                         fontSize: "13px",
                         outline: "none",
                         boxSizing: "border-box",
@@ -625,21 +624,21 @@ export default function WorkspaceModal({
                   </div>
 
                   <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#f8fafc", marginBottom: "6px" }}>
-                      Headquarters / Hub Location
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      City / Location
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Surat, Gujarat / Mumbai"
+                      placeholder="e.g. Mumbai, Surat, Delhi"
                       value={regLocation}
                       onChange={(e) => setRegLocation(e.target.value)}
                       style={{
                         width: "100%",
                         padding: "10px 14px",
                         borderRadius: "8px",
-                        backgroundColor: "rgba(255, 255, 255, 0.05)",
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
-                        color: "#ececef",
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #cbd5e1",
+                        color: "#0f172a",
                         fontSize: "13px",
                         outline: "none",
                         boxSizing: "border-box",
@@ -656,8 +655,8 @@ export default function WorkspaceModal({
                       width: "100%",
                       padding: "12px",
                       borderRadius: "8px",
-                      backgroundColor: "#4ade80",
-                      color: "#0c0d0e",
+                      backgroundColor: "#2563eb",
+                      color: "#ffffff",
                       fontWeight: 700,
                       fontSize: "13px",
                       border: "none",
@@ -671,13 +670,13 @@ export default function WorkspaceModal({
                   >
                     {regSubmitting ? (
                       <>
-                        <Loader2 size={16} className="spin" />
-                        <span>Registering & Initializing Subsidiary...</span>
+                        <Loader2 size={16} className="sc-spin" />
+                        <span>Creating Workspace...</span>
                       </>
                     ) : (
                       <>
                         <Sparkles size={16} />
-                        <span>Create Isolated Branch Workspace</span>
+                        <span>Create Workspace</span>
                       </>
                     )}
                   </button>

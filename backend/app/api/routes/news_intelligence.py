@@ -45,9 +45,8 @@ class NewsIntelligenceRequest(
         description="Detailed disruption description.",
     )
 
-    source: str = Field(
-        default="manual",
-        min_length=1,
+    source: str | None = Field(
+        default="Manual Incident Report",
         description="News source.",
     )
 
@@ -62,7 +61,9 @@ class NewsIntelligenceRequest(
 
 # ============================================================
 # ANALYZE
-# ============================================================
+from app.api.dependencies import get_optional_current_user
+from app.api.routes.supply_chain import _resolve_user_id
+from app.models.user import User
 
 
 @router.post(
@@ -70,6 +71,7 @@ class NewsIntelligenceRequest(
 )
 def analyze_intelligence(
     payload: NewsIntelligenceRequest,
+    current_user: User | None = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -104,9 +106,13 @@ def analyze_intelligence(
 
     try:
 
+        user_id = _resolve_user_id(current_user, db)
         pipeline = IntelligencePipeline(
-            db
+            db,
+            user_id=user_id,
         )
+
+        src = (payload.source or "").strip() or "Manual Incident Report"
 
         # ----------------------------------------------------
         # Support both newer and older pipeline signatures.
@@ -117,7 +123,7 @@ def analyze_intelligence(
             result = pipeline.process(
                 title=payload.title,
                 description=payload.description,
-                source=payload.source,
+                source=src,
                 auto_simulate=payload.auto_simulate,
             )
 

@@ -226,11 +226,10 @@ export default function ExcelDataImport({
       {/* Header */}
       <div className="page-header-row">
         <div className="page-headline">
-          <span className="eyebrow-tag">DATA MANAGEMENT ENGINE</span>
-          <h2>Business Supply Chain Excel Import</h2>
+          <span className="eyebrow-tag">UPLOAD DATA</span>
+          <h2>Upload Supply Chain Excel File</h2>
           <p>
-            Upload your company's multi-tier supply chain spreadsheets (.xlsx) to build your operational SQL dataset
-            and topological Neo4j knowledge graph.
+            Upload your company's Excel file (.xlsx) with suppliers, factories, and parts to update your system and run disruption tests.
           </p>
         </div>
 
@@ -240,17 +239,17 @@ export default function ExcelDataImport({
             download="AtmoGraph_Supply_Chain_Template.xlsx"
             className="sc-primary-button"
             style={{
-              background: "#1e293b",
-              border: "1px solid rgba(255,255,255,0.12)",
-              color: "#f8fafc",
+              background: "#ffffff",
+              border: "1px solid #cbd5e1",
+              color: "#0f172a",
               textDecoration: "none",
               display: "inline-flex",
               alignItems: "center",
               gap: "7px",
             }}
           >
-            <Download size={15} />
-            Download Excel Template
+            <Download size={15} color="#2563eb" />
+            Download Blank Template
           </a>
 
           <button
@@ -258,19 +257,19 @@ export default function ExcelDataImport({
             onClick={handleSyncGraph}
             disabled={syncingGraph}
             style={{
-              background: "linear-gradient(135deg, #d4942c 0%, #e8a838 50%, #f0b848 100%)",
-              color: "#0a0a0b",
+              background: "#2563eb",
+              color: "#ffffff",
             }}
           >
             {syncingGraph ? (
               <>
                 <Loader2 size={15} className="sc-spin" />
-                Syncing Graph...
+                Updating Map...
               </>
             ) : (
               <>
                 <Network size={15} />
-                Sync Neo4j Graph
+                Update Supply Map
               </>
             )}
           </button>
@@ -284,8 +283,8 @@ export default function ExcelDataImport({
             <UploadCloud size={18} />
           </div>
           <div>
-            <strong style={{ fontSize: "15px" }}>Upload Supply Chain Workbook</strong>
-            <span>Multi-sheet Excel workbook with Suppliers, Plants, Components, Products, Allocations & Routes</span>
+            <strong style={{ fontSize: "15px" }}>Upload Excel Spreadsheet</strong>
+            <span>Spreadsheet with sheets for Suppliers, Factories, Parts, Products, and Warehouses</span>
           </div>
         </div>
 
@@ -308,10 +307,10 @@ export default function ExcelDataImport({
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
           style={{
-            border: `2px dashed ${dragActive ? "#e8a838" : "rgba(255, 255, 255, 0.12)"}`,
+            border: `2px dashed ${dragActive ? "#2563eb" : "#cbd5e1"}`,
             borderRadius: "10px",
-            background: dragActive ? "rgba(232, 168, 56, 0.08)" : "rgba(20, 20, 22, 0.6)",
-            padding: "32px 20px",
+            background: dragActive ? "rgba(37, 99, 235, 0.08)" : "#f8fafc",
+            padding: "36px 20px",
             textAlign: "center",
             cursor: "pointer",
             transition: "all 0.2s ease",
@@ -322,8 +321,8 @@ export default function ExcelDataImport({
               width: "52px",
               height: "52px",
               borderRadius: "50%",
-              background: "rgba(99, 102, 241, 0.12)",
-              color: "#e8a838",
+              background: "rgba(37, 99, 235, 0.1)",
+              color: "#2563eb",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -335,18 +334,18 @@ export default function ExcelDataImport({
 
           {file ? (
             <div>
-              <strong style={{ fontSize: "15px", color: "#f8fafc", display: "block" }}>{file.name}</strong>
-              <span style={{ fontSize: "12px", color: "#94a3b8" }}>
+              <strong style={{ fontSize: "15px", color: "#0f172a", display: "block" }}>{file.name}</strong>
+              <span style={{ fontSize: "12px", color: "#64748b" }}>
                 {(file.size / (1024 * 1024)).toFixed(2)} MB · Click or drop another file to replace
               </span>
             </div>
           ) : (
             <div>
-              <strong style={{ fontSize: "15px", color: "#f8fafc", display: "block" }}>
-                Drag & Drop your Business Excel spreadsheet here
+              <strong style={{ fontSize: "15px", color: "#0f172a", display: "block" }}>
+                Drag & Drop your Excel file here
               </strong>
-              <span style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px", display: "block" }}>
-                or click to browse your computer (.xlsx, .xls up to 25MB)
+              <span style={{ fontSize: "13px", color: "#64748b", marginTop: "4px", display: "block" }}>
+                or click to choose a file from your computer (.xlsx, .xls up to 25MB)
               </span>
             </div>
           )}
@@ -358,17 +357,17 @@ export default function ExcelDataImport({
               className="sc-primary-button"
               onClick={handleValidate}
               disabled={validating || importing}
-              style={{ background: "#1e293b", border: "1px solid rgba(255,255,255,0.15)" }}
+              style={{ background: "#ffffff", border: "1px solid #cbd5e1", color: "#0f172a" }}
             >
               {validating ? (
                 <>
                   <Loader2 size={16} className="sc-spin" />
-                  Validating Structure...
+                  Checking File...
                 </>
               ) : (
                 <>
-                  <CheckCircle2 size={16} color="#38bdf8" />
-                  Validate Workbook
+                  <CheckCircle2 size={16} color="#2563eb" />
+                  Check File First
                 </>
               )}
             </button>
@@ -378,25 +377,26 @@ export default function ExcelDataImport({
               onClick={handleImport}
               disabled={importing || validating}
               style={{
-                background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                background: "#2563eb",
+                color: "#ffffff",
                 fontWeight: 600,
               }}
             >
               {importing ? (
                 <>
                   <Loader2 size={16} className="sc-spin" />
-                  Importing & Synchronizing...
+                  Saving & Updating...
                 </>
               ) : (
                 <>
                   <Database size={16} />
-                  Import to Database & Graph
+                  Save to Database & Map
                 </>
               )}
             </button>
 
-            <span style={{ fontSize: "12px", color: "#94a3b8", marginLeft: "auto" }}>
-              {validationResult ? "Structure validated. Ready for database ingestion." : "Validate or directly import."}
+            <span style={{ fontSize: "12px", color: "#64748b", marginLeft: "auto" }}>
+              {validationResult ? "File looks good! Click 'Save to Database & Map'." : "Check file first or save directly."}
             </span>
           </div>
         )}
@@ -406,15 +406,15 @@ export default function ExcelDataImport({
       {error && (
         <div
           className="active-banner"
-          style={{ background: "rgba(239, 68, 68, 0.12)", borderColor: "rgba(239, 68, 68, 0.3)" }}
+          style={{ background: "#fef2f2", borderColor: "#fecaca" }}
         >
           <div className="active-banner-left">
-            <div className="active-banner-icon">
+            <div className="active-banner-icon" style={{ background: "#fee2e2", color: "#dc2626" }}>
               <AlertCircle size={18} />
             </div>
             <div>
-              <div className="active-banner-title">Operation Error</div>
-              <div className="active-banner-sub" style={{ whiteSpace: "pre-wrap" }}>
+              <div className="active-banner-title" style={{ color: "#991b1b" }}>Something Went Wrong</div>
+              <div className="active-banner-sub" style={{ color: "#b91c1c", whiteSpace: "pre-wrap" }}>
                 {error}
               </div>
             </div>
@@ -428,23 +428,24 @@ export default function ExcelDataImport({
           className="sc-panel"
           style={{
             padding: "20px",
-            borderLeft: validationResult.success ? "4px solid #10b981" : "4px solid #ef4444",
+            borderLeft: validationResult.success ? "4px solid #16a34a" : "4px solid #dc2626",
+            background: "#ffffff",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
             {validationResult.success ? (
-              <CheckCircle2 size={20} color="#34d399" />
+              <CheckCircle2 size={20} color="#16a34a" />
             ) : (
-              <AlertCircle size={20} color="#f87171" />
+              <AlertCircle size={20} color="#dc2626" />
             )}
             <div>
-              <strong style={{ color: "#f8fafc", fontSize: "15px" }}>
+              <strong style={{ color: "#0f172a", fontSize: "15px" }}>
                 {validationResult.success
-                  ? "Workbook Validation Successful"
-                  : "Validation Found Structural Issues"}
+                  ? "File Check Passed Successfully"
+                  : "We Found Some Issues in the File"}
               </strong>
-              <small style={{ display: "block", color: "#94a3b8" }}>
-                {validationResult.sheets_validated.length} of {validationResult.sheets_found.length} sheets validated
+              <small style={{ display: "block", color: "#64748b" }}>
+                {validationResult.sheets_validated.length} of {validationResult.sheets_found.length} sheets checked
               </small>
             </div>
           </div>
@@ -461,23 +462,23 @@ export default function ExcelDataImport({
               <div
                 key={sheet}
                 style={{
-                  background: "rgba(255, 255, 255, 0.03)",
-                  border: "1px solid rgba(255, 255, 255, 0.06)",
+                  background: "#f8fafc",
+                  border: "1px solid #e2e8f0",
                   borderRadius: "6px",
                   padding: "10px",
                 }}
               >
-                <div style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase" }}>{sheet}</div>
-                <div style={{ fontSize: "16px", fontWeight: 700, color: "#f8fafc", marginTop: "2px" }}>
-                  {count} rows
+                <div style={{ fontSize: "11px", color: "#64748b", textTransform: "uppercase" }}>{sheet}</div>
+                <div style={{ fontSize: "16px", fontWeight: 700, color: "#0f172a", marginTop: "2px" }}>
+                  {count} items
                 </div>
               </div>
             ))}
           </div>
 
           {validationResult.warnings && validationResult.warnings.length > 0 && (
-            <div style={{ marginTop: "14px", fontSize: "12px", color: "#fbbf24" }}>
-              <strong>Warnings:</strong>
+            <div style={{ marginTop: "14px", fontSize: "12px", color: "#d97706" }}>
+              <strong>Notice:</strong>
               <ul style={{ margin: "4px 0 0 18px" }}>
                 {validationResult.warnings.map((w, idx) => (
                   <li key={idx}>{w}</li>
@@ -494,28 +495,27 @@ export default function ExcelDataImport({
           className="sc-panel"
           style={{
             padding: "20px",
-            borderLeft: "4px solid #10b981",
-            background: "rgba(16, 185, 129, 0.05)",
+            borderLeft: "4px solid #16a34a",
+            background: "rgba(22, 163, 74, 0.08)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
-            <CheckCircle2 size={22} color="#34d399" />
+            <CheckCircle2 size={22} color="#16a34a" />
             <div>
-              <strong style={{ color: "#f8fafc", fontSize: "16px" }}>
-                Supply Chain Ingestion Completed Successfully
+              <strong style={{ color: "#0f172a", fontSize: "16px" }}>
+                Excel File Uploaded Successfully!
               </strong>
-              <small style={{ display: "block", color: "#94a3b8" }}>
-                Database tables populated and {importResult.neo4j_sync?.graph?.nodes ?? 0} Neo4j graph nodes
-                synchronized.
+              <small style={{ display: "block", color: "#475569" }}>
+                Your data is saved and {importResult.neo4j_sync?.graph?.nodes ?? 0} points are ready on the map.
               </small>
             </div>
             <button
               className="sc-primary-button"
-              style={{ marginLeft: "auto", background: "#4f46e5" }}
+              style={{ marginLeft: "auto", background: "#2563eb", color: "#ffffff" }}
               onClick={onNavigateToGraph}
             >
               <Network size={15} />
-              Open Network Graph
+              Open Supply Chain Map
             </button>
           </div>
         </div>
@@ -528,14 +528,14 @@ export default function ExcelDataImport({
             <Building2 size={16} />
           </div>
           <div>
-            <strong>Active Business Data Catalog</strong>
-            <span>Currently imported operational entities and facilities</span>
+            <strong>Current Business Catalog</strong>
+            <span>Suppliers, factories, parts, and warehouses saved in the system</span>
           </div>
 
           <button
             className="sc-icon-button"
             title="Refresh Catalog"
-            style={{ marginLeft: "auto" }}
+            style={{ marginLeft: "auto", background: "#f1f5f9", border: "1px solid #cbd5e1", color: "#0f172a" }}
             onClick={loadCatalog}
             disabled={catalogLoading}
           >
@@ -547,10 +547,10 @@ export default function ExcelDataImport({
         <div
           style={{
             display: "flex",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+            borderBottom: "1px solid #e2e8f0",
             padding: "0 20px",
             gap: "8px",
-            background: "rgba(11, 15, 23, 0.4)",
+            background: "#f8fafc",
           }}
         >
           <button
@@ -560,8 +560,8 @@ export default function ExcelDataImport({
               padding: "12px 14px",
               background: "transparent",
               border: "none",
-              borderBottom: activeTab === "suppliers" ? "2px solid #e8a838" : "2px solid transparent",
-              color: activeTab === "suppliers" ? "#f8fafc" : "#94a3b8",
+              borderBottom: activeTab === "suppliers" ? "2px solid #2563eb" : "2px solid transparent",
+              color: activeTab === "suppliers" ? "#2563eb" : "#64748b",
               fontWeight: 600,
               fontSize: "13px",
               cursor: "pointer",
@@ -581,8 +581,8 @@ export default function ExcelDataImport({
               padding: "12px 14px",
               background: "transparent",
               border: "none",
-              borderBottom: activeTab === "plants" ? "2px solid #e8a838" : "2px solid transparent",
-              color: activeTab === "plants" ? "#f8fafc" : "#94a3b8",
+              borderBottom: activeTab === "plants" ? "2px solid #2563eb" : "2px solid transparent",
+              color: activeTab === "plants" ? "#2563eb" : "#64748b",
               fontWeight: 600,
               fontSize: "13px",
               cursor: "pointer",
@@ -592,7 +592,7 @@ export default function ExcelDataImport({
             }}
           >
             <Factory size={15} />
-            Plants ({catalog?.plants?.length ?? 0})
+            Factories ({catalog?.plants?.length ?? 0})
           </button>
 
           <button
@@ -602,8 +602,8 @@ export default function ExcelDataImport({
               padding: "12px 14px",
               background: "transparent",
               border: "none",
-              borderBottom: activeTab === "components" ? "2px solid #e8a838" : "2px solid transparent",
-              color: activeTab === "components" ? "#f8fafc" : "#94a3b8",
+              borderBottom: activeTab === "components" ? "2px solid #2563eb" : "2px solid transparent",
+              color: activeTab === "components" ? "#2563eb" : "#64748b",
               fontWeight: 600,
               fontSize: "13px",
               cursor: "pointer",
@@ -613,7 +613,7 @@ export default function ExcelDataImport({
             }}
           >
             <Layers size={15} />
-            Components ({catalog?.components?.length ?? 0})
+            Parts ({catalog?.components?.length ?? 0})
           </button>
 
           <button
@@ -623,8 +623,8 @@ export default function ExcelDataImport({
               padding: "12px 14px",
               background: "transparent",
               border: "none",
-              borderBottom: activeTab === "products" ? "2px solid #e8a838" : "2px solid transparent",
-              color: activeTab === "products" ? "#f8fafc" : "#94a3b8",
+              borderBottom: activeTab === "products" ? "2px solid #2563eb" : "2px solid transparent",
+              color: activeTab === "products" ? "#2563eb" : "#64748b",
               fontWeight: 600,
               fontSize: "13px",
               cursor: "pointer",
@@ -644,8 +644,8 @@ export default function ExcelDataImport({
               padding: "12px 14px",
               background: "transparent",
               border: "none",
-              borderBottom: activeTab === "warehouses" ? "2px solid #e8a838" : "2px solid transparent",
-              color: activeTab === "warehouses" ? "#f8fafc" : "#94a3b8",
+              borderBottom: activeTab === "warehouses" ? "2px solid #2563eb" : "2px solid transparent",
+              color: activeTab === "warehouses" ? "#2563eb" : "#64748b",
               fontWeight: 600,
               fontSize: "13px",
               cursor: "pointer",
@@ -660,20 +660,20 @@ export default function ExcelDataImport({
         </div>
 
         {/* Filter / Search input */}
-        <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255, 255, 255, 0.06)" }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid #e2e8f0" }}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              background: "#0b0f17",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              background: "#ffffff",
+              border: "1px solid #cbd5e1",
               borderRadius: "6px",
               padding: "6px 12px",
               maxWidth: "360px",
             }}
           >
-            <Search size={14} color="#94a3b8" />
+            <Search size={14} color="#64748b" />
             <input
               type="text"
               placeholder={`Search ${activeTab}...`}
@@ -682,8 +682,8 @@ export default function ExcelDataImport({
               style={{
                 background: "transparent",
                 border: "none",
-                color: "#f8fafc",
-                fontSize: "12px",
+                color: "#0f172a",
+                fontSize: "13px",
                 outline: "none",
                 width: "100%",
               }}
@@ -699,34 +699,34 @@ export default function ExcelDataImport({
                 <span>SUPPLIER ID</span>
                 <span>NAME</span>
                 <span>LOCATION</span>
-                <span>LOCATION STATUS</span>
+                <span>MAP STATUS</span>
                 <span>ACTIONS</span>
               </div>
               {filteredSuppliers.length === 0 ? (
-                <div style={{ padding: "24px", textAlign: "center", color: "#94a3b8", fontSize: "13px" }}>
-                  No suppliers found. Upload an Excel spreadsheet above to populate.
+                <div style={{ padding: "24px", textAlign: "center", color: "#64748b", fontSize: "13px" }}>
+                  No suppliers found. Upload an Excel spreadsheet above to add suppliers.
                 </div>
               ) : (
                 filteredSuppliers.map((s) => (
                   <div className="sc-table-row" key={s.supplier_id}>
-                    <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#e8a838" }}>{s.supplier_id}</span>
-                    <strong style={{ color: "#f8fafc" }}>{s.name}</strong>
-                    <span>
+                    <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#2563eb", fontWeight: 600 }}>{s.supplier_id}</span>
+                    <strong style={{ color: "#0f172a" }}>{s.name}</strong>
+                    <span style={{ color: "#475569" }}>
                       {s.city ?? "HQ"}, {s.country ?? "Global"}
                     </span>
                     <span>
                       <span className={`status-badge ${s.location_known ? "badge-running" : "badge-buffered"}`}>
-                        {s.location_known ? "KNOWN GEO" : "APPROXIMATE"}
+                        {s.location_known ? "EXACT LOCATION" : "APPROXIMATE"}
                       </span>
                     </span>
                     <span>
                       <button
                         className="sc-primary-button"
-                        style={{ padding: "4px 10px", fontSize: "11px" }}
+                        style={{ padding: "5px 12px", fontSize: "12px", background: "#f1f5f9", border: "1px solid #cbd5e1", color: "#0f172a" }}
                         onClick={() => onSelectSupplierForSimulation?.(s.supplier_id)}
                       >
-                        <Zap size={12} />
-                        Simulate Outage
+                        <Zap size={12} color="#2563eb" />
+                        Test Delay
                       </button>
                     </span>
                   </div>
@@ -738,22 +738,22 @@ export default function ExcelDataImport({
           {activeTab === "plants" && (
             <div className="sc-table col-4">
               <div className="sc-table-head">
-                <span>PLANT ID</span>
+                <span>FACTORY ID</span>
                 <span>NAME</span>
                 <span>COMPANY</span>
                 <span>LOCATION</span>
               </div>
               {filteredPlants.length === 0 ? (
-                <div style={{ padding: "24px", textAlign: "center", color: "#94a3b8", fontSize: "13px" }}>
-                  No plants found.
+                <div style={{ padding: "24px", textAlign: "center", color: "#64748b", fontSize: "13px" }}>
+                  No factories found.
                 </div>
               ) : (
                 filteredPlants.map((p) => (
                   <div className="sc-table-row" key={p.plant_id}>
-                    <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#e8a838" }}>{p.plant_id}</span>
-                    <strong style={{ color: "#f8fafc" }}>{p.name}</strong>
-                    <span>{p.company_id ?? "--"}</span>
-                    <span>
+                    <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#2563eb", fontWeight: 600 }}>{p.plant_id}</span>
+                    <strong style={{ color: "#0f172a" }}>{p.name}</strong>
+                    <span style={{ color: "#475569" }}>{p.company_id ?? "--"}</span>
+                    <span style={{ color: "#475569" }}>
                       {p.city ?? "HQ"}, {p.country ?? "Global"}
                     </span>
                   </div>
@@ -765,20 +765,20 @@ export default function ExcelDataImport({
           {activeTab === "components" && (
             <div className="sc-table col-3">
               <div className="sc-table-head">
-                <span>COMPONENT ID</span>
+                <span>PART ID</span>
                 <span>NAME</span>
                 <span>CATEGORY</span>
               </div>
               {filteredComponents.length === 0 ? (
-                <div style={{ padding: "24px", textAlign: "center", color: "#94a3b8", fontSize: "13px" }}>
-                  No components found.
+                <div style={{ padding: "24px", textAlign: "center", color: "#64748b", fontSize: "13px" }}>
+                  No parts found.
                 </div>
               ) : (
                 filteredComponents.map((c) => (
                   <div className="sc-table-row" key={c.component_id}>
-                    <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#e8a838" }}>{c.component_id}</span>
-                    <strong style={{ color: "#f8fafc" }}>{c.name}</strong>
-                    <span style={{ textTransform: "capitalize" }}>{c.category ?? "General"}</span>
+                    <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#2563eb", fontWeight: 600 }}>{c.component_id}</span>
+                    <strong style={{ color: "#0f172a" }}>{c.name}</strong>
+                    <span style={{ textTransform: "capitalize", color: "#475569" }}>{c.category ?? "General"}</span>
                   </div>
                 ))
               )}
@@ -793,15 +793,15 @@ export default function ExcelDataImport({
                 <span>CATEGORY</span>
               </div>
               {filteredProducts.length === 0 ? (
-                <div style={{ padding: "24px", textAlign: "center", color: "#94a3b8", fontSize: "13px" }}>
+                <div style={{ padding: "24px", textAlign: "center", color: "#64748b", fontSize: "13px" }}>
                   No finished products found.
                 </div>
               ) : (
                 filteredProducts.map((p) => (
                   <div className="sc-table-row" key={p.product_id}>
-                    <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#e8a838" }}>{p.product_id}</span>
-                    <strong style={{ color: "#f8fafc" }}>{p.name}</strong>
-                    <span style={{ textTransform: "capitalize" }}>{p.category ?? "Finished Good"}</span>
+                    <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#2563eb", fontWeight: 600 }}>{p.product_id}</span>
+                    <strong style={{ color: "#0f172a" }}>{p.name}</strong>
+                    <span style={{ textTransform: "capitalize", color: "#475569" }}>{p.category ?? "Finished Good"}</span>
                   </div>
                 ))
               )}
@@ -816,15 +816,15 @@ export default function ExcelDataImport({
                 <span>LOCATION</span>
               </div>
               {filteredWarehouses.length === 0 ? (
-                <div style={{ padding: "24px", textAlign: "center", color: "#94a3b8", fontSize: "13px" }}>
+                <div style={{ padding: "24px", textAlign: "center", color: "#64748b", fontSize: "13px" }}>
                   No warehouses found.
                 </div>
               ) : (
                 filteredWarehouses.map((w) => (
                   <div className="sc-table-row" key={w.warehouse_id}>
-                    <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#e8a838" }}>{w.warehouse_id}</span>
-                    <strong style={{ color: "#f8fafc" }}>{w.name}</strong>
-                    <span>
+                    <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#2563eb", fontWeight: 600 }}>{w.warehouse_id}</span>
+                    <strong style={{ color: "#0f172a" }}>{w.name}</strong>
+                    <span style={{ color: "#475569" }}>
                       {w.city ?? "HQ"}, {w.country ?? "Global"}
                     </span>
                   </div>

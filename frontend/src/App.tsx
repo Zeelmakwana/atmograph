@@ -51,6 +51,13 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("overview");
   const [selectedSupplierForSim, setSelectedSupplierForSim] = useState<string>("");
   const [activeEventId, setActiveEventId] = useState<number | null>(null);
+  const [selectedEventForRadar, setSelectedEventForRadar] = useState<{
+    id?: number;
+    title?: string;
+    description?: string;
+    source?: string;
+    activatedAt?: number;
+  } | null>(null);
   const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
   const [activeWorkspace, setActiveWorkspace] = useState<BusinessWorkspace | null>(null);
 
@@ -101,6 +108,19 @@ function AppContent() {
     setActiveTab("simulator");
   };
 
+  const handleActivateHistoricalEvent = (event: any) => {
+    const id = Number(event?.id ?? event?.event_id);
+    if (id) setActiveEventId(id);
+    setSelectedEventForRadar({
+      id: id || undefined,
+      title: event?.title || "",
+      description: event?.description || "",
+      source: event?.source || "Historical Incident Archive",
+      activatedAt: Date.now(),
+    });
+    setActiveTab("radar");
+  };
+
   // Show loading state
   if (isLoading) {
     return (
@@ -109,11 +129,12 @@ function AppContent() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#0a0a0b",
-        color: "#e8a838",
-        fontSize: "18px"
+        background: "#f8fafc",
+        color: "#2563eb",
+        fontSize: "16px",
+        fontWeight: 600
       }}>
-        Loading...
+        Loading AtmoGraph...
       </div>
     );
   }
@@ -140,22 +161,22 @@ function AppContent() {
           </div>
           <div>
             <div className="brand-title">AtmoGraph</div>
-            <div className="brand-subtitle">Supply Chain Intelligence</div>
+            <div className="brand-subtitle">Risk & Delay Tracker</div>
           </div>
         </div>
 
         {/* Navigation Items */}
         <nav className="sidebar-nav">
-          <div className="nav-section-title">WORKFLOW STUDIO</div>
+          <div className="nav-section-title">MAIN MENU</div>
 
           <button
             className={`nav-link ${activeTab === "overview" ? "active" : ""}`}
             onClick={() => setActiveTab("overview")}
           >
             <span className="nav-icon">
-              <Zap size={17} color="#e8a838" />
+              <Zap size={17} color="#2563eb" />
             </span>
-            <span>1. Ripple Predictor</span>
+            <span>1. Disruption Checker</span>
           </button>
 
           <button
@@ -165,7 +186,7 @@ function AppContent() {
             <span className="nav-icon">
               <Network size={17} />
             </span>
-            <span>2. Interactive Graph</span>
+            <span>2. Supply Chain Map</span>
           </button>
 
           <button
@@ -185,19 +206,22 @@ function AppContent() {
             <span className="nav-icon">
               <FileSpreadsheet size={17} />
             </span>
-            <span>4. Upload Business Data</span>
+            <span>4. Upload Excel Data</span>
           </button>
 
-          <div className="nav-section-title">MONITORING & SYSTEM</div>
+          <div className="nav-section-title">MORE TOOLS</div>
 
           <button
             className={`nav-link ${activeTab === "radar" ? "active" : ""}`}
-            onClick={() => setActiveTab("radar")}
+            onClick={() => {
+              setSelectedEventForRadar(null);
+              setActiveTab("radar");
+            }}
           >
             <span className="nav-icon">
               <AlertTriangle size={17} />
             </span>
-            <span>Live News Radar</span>
+            <span>Live Alerts & News</span>
           </button>
 
           <button
@@ -207,7 +231,7 @@ function AppContent() {
             <span className="nav-icon">
               <History size={17} />
             </span>
-            <span>Historical Replay</span>
+            <span>Past Incident History</span>
           </button>
 
           <button
@@ -217,7 +241,7 @@ function AppContent() {
             <span className="nav-icon">
               <Activity size={17} />
             </span>
-            <span>Diagnostics & Settings</span>
+            <span>Settings & Health</span>
           </button>
         </nav>
 
@@ -226,10 +250,10 @@ function AppContent() {
           <div className="engine-status">
             <span className="pulse-dot" />
             <div>
-              <strong style={{ color: "#ececef", fontSize: "11px", display: "block" }}>
-                Universal AI Engine
+              <strong style={{ color: "#0f172a", fontSize: "11.5px", display: "block" }}>
+                AI Protection Engine
               </strong>
-              <span style={{ color: "#8e8e96", fontSize: "10px" }}>Ready for Simulation</span>
+              <span style={{ color: "#16a34a", fontSize: "11px", fontWeight: 600 }}>All Systems Ready</span>
             </div>
           </div>
         </div>
@@ -241,7 +265,7 @@ function AppContent() {
         <header className="app-topbar">
           <div className="topbar-left">
             <div className="topbar-page-title">
-              <span style={{ color: "#e8a838" }}>
+              <span style={{ color: "#2563eb" }}>
                 {activeTab === "overview" && <Zap size={18} />}
                 {activeTab === "catalog" && <FileSpreadsheet size={18} />}
                 {activeTab === "network" && <Network size={18} />}
@@ -251,13 +275,13 @@ function AppContent() {
                 {activeTab === "status" && <Activity size={18} />}
               </span>
               <span>
-                {activeTab === "overview" && "AtmoGraph · Ripple Predictor Studio"}
-                {activeTab === "catalog" && "Upload Business Data (Excel / JSON)"}
-                {activeTab === "network" && "Interactive Supply Network Graph"}
-                {activeTab === "simulator" && "Deep-Dive Disruption Simulator"}
-                {activeTab === "radar" && "Incident & Maritime News Radar"}
-                {activeTab === "history" && "Historical Intelligence & Event Replay"}
-                {activeTab === "status" && "System Diagnostics & Settings"}
+                {activeTab === "overview" && "Disruption Checker · See What Happens When Delay Strikes"}
+                {activeTab === "catalog" && "Upload Your Supply Chain Excel Sheet"}
+                {activeTab === "network" && "Interactive Supply Chain Map"}
+                {activeTab === "simulator" && "What-If Scenario Simulator"}
+                {activeTab === "radar" && "Live Disruption News & Alerts"}
+                {activeTab === "history" && "Past Incident History & Lessons"}
+                {activeTab === "status" && "System Settings & Health Check"}
               </span>
             </div>
           </div>
@@ -265,29 +289,25 @@ function AppContent() {
           <div className="topbar-actions">
             <GlobalSearch
               activeEventId={activeEventId ?? undefined}
-              onSelectEvent={(ev: any) => {
-                const id = Number(ev.id ?? ev.event_id);
-                if (id) setActiveEventId(id);
-                setActiveTab("radar");
-              }}
+              onSelectEvent={handleActivateHistoricalEvent}
             />
 
             {/* User Profile & Company with Tenant Privacy Badge */}
             <button
               onClick={() => setIsWorkspaceModalOpen(true)}
-              title="My Isolated Enterprise Workspace & Tenant Settings"
+              title="My Business Profile & Workspace Settings"
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
                 padding: "6px 14px",
                 borderRadius: "10px",
-                border: "1px solid rgba(232, 168, 56, 0.4)",
-                backgroundColor: "rgba(232, 168, 56, 0.08)",
-                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.25)",
+                border: "1px solid #cbd5e1",
+                backgroundColor: "#ffffff",
+                boxShadow: "0 1px 3px rgba(15, 23, 42, 0.05)",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
-                color: "#ececef",
+                color: "#0f172a",
               }}
             >
               <div
@@ -295,15 +315,15 @@ function AppContent() {
                   width: "32px",
                   height: "32px",
                   borderRadius: "8px",
-                  backgroundColor: "#e8a838",
-                  color: "#0c0d0e",
-                  fontWeight: 800,
+                  backgroundColor: "#2563eb",
+                  color: "#ffffff",
+                  fontWeight: 700,
                   fontSize: "12.5px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
-                  boxShadow: "0 2px 8px rgba(232, 168, 56, 0.3)",
+                  boxShadow: "0 2px 6px rgba(37, 99, 235, 0.25)",
                 }}
               >
                 {user.company_name?.substring(0, 2).toUpperCase() || "CO"}
@@ -314,7 +334,7 @@ function AppContent() {
                   style={{
                     fontSize: "12.5px",
                     fontWeight: 700,
-                    color: "#f8fafc",
+                    color: "#0f172a",
                     display: "flex",
                     alignItems: "center",
                     gap: "6px",
@@ -323,12 +343,12 @@ function AppContent() {
                   <span style={{ maxWidth: "170px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {activeWorkspace?.company_name || user.company_name}
                   </span>
-                  <span style={{ fontSize: "10px", color: "#4ade80", background: "rgba(74, 222, 128, 0.15)", padding: "1px 5px", borderRadius: "4px", border: "1px solid rgba(74, 222, 128, 0.3)" }}>
+                  <span style={{ fontSize: "10px", color: "#16a34a", background: "#f0fdf4", padding: "1px 6px", borderRadius: "4px", border: "1px solid #bbf7d0", fontWeight: 700 }}>
                     PRIVATE
                   </span>
-                  <ChevronDown size={13} color="#e8a838" />
+                  <ChevronDown size={13} color="#64748b" />
                 </div>
-                <div style={{ fontSize: "10.5px", color: "#e8a838", display: "flex", alignItems: "center", gap: "4px" }}>
+                <div style={{ fontSize: "11px", color: "#64748b", display: "flex", alignItems: "center", gap: "4px" }}>
                   <span>{user.email}</span>
                 </div>
               </div>
@@ -345,10 +365,11 @@ function AppContent() {
                 width: "36px",
                 height: "36px",
                 borderRadius: "8px",
-                border: "1px solid rgba(239, 68, 68, 0.3)",
-                backgroundColor: "rgba(239, 68, 68, 0.1)",
+                border: "1px solid #fecaca",
+                backgroundColor: "#fef2f2",
                 cursor: "pointer",
-                color: "#f87171",
+                color: "#dc2626",
+                boxShadow: "0 1px 2px rgba(0, 0, 0, 0.04)",
               }}
             >
               <LogOut size={16} />
@@ -384,6 +405,7 @@ function AppContent() {
 
           {activeTab === "radar" && (
             <IncidentRadarPage
+              initialEvent={selectedEventForRadar}
               onNavigateToSimulator={(supId) => {
                 if (supId) setSelectedSupplierForSim(supId);
                 setActiveTab("simulator");
@@ -395,11 +417,7 @@ function AppContent() {
           {activeTab === "history" && (
             <div className="page-container">
               <HistoricalIntelligence
-                onActivate={(event) => {
-                  const id = Number(event.id ?? event.event_id);
-                  if (id) setActiveEventId(id);
-                  setActiveTab("radar");
-                }}
+                onActivate={handleActivateHistoricalEvent}
               />
             </div>
           )}
