@@ -45,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(tokenData);
     localStorage.setItem("atmograph_token", tokenData);
     localStorage.setItem("atmograph_user", JSON.stringify(userData));
+    localStorage.removeItem("atmograph:last-supplier-simulation");
   };
 
   const logout = () => {
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     localStorage.removeItem("atmograph_token");
     localStorage.removeItem("atmograph_user");
+    localStorage.removeItem("atmograph:last-supplier-simulation");
   };
 
   const setLoading = (loading: boolean) => {

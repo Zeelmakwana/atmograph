@@ -411,6 +411,7 @@ function AppContent() {
                 setActiveTab("simulator");
               }}
               onOpenWorkspaceModal={() => setIsWorkspaceModalOpen(true)}
+              onNavigateToCatalog={() => setActiveTab("catalog")}
             />
           )}
 
@@ -418,6 +419,7 @@ function AppContent() {
             <div className="page-container">
               <HistoricalIntelligence
                 onActivate={handleActivateHistoricalEvent}
+                onNavigateToCatalog={() => setActiveTab("catalog")}
               />
             </div>
           )}

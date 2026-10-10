@@ -318,6 +318,23 @@ export function ingestNews(
   );
 }
 
+export function ingestRssNews(limit = 5, autoSimulate = true) {
+  return request<any>(
+    "/api/news/ingest-rss",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        limit,
+        auto_simulate: autoSimulate,
+      }),
+    }
+  );
+}
+
+export function getNewsMonitorStatus() {
+  return request<any>("/api/news/monitor-status");
+}
+
 /* ============================================================
    HEALTH
 ============================================================ */

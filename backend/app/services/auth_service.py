@@ -70,8 +70,9 @@ class AuthService:
 
         Returns a dict with success status and user or error message.
         """
+        clean_email = email.strip().lower() if email else ""
         # Check if email already exists
-        existing = self.db.query(User).filter(User.email == email).first()
+        existing = self.db.query(User).filter(User.email == clean_email).first()
 
         if existing:
             return {
@@ -83,9 +84,9 @@ class AuthService:
         hashed_password = hash_password(password)
 
         new_user = User(
-            email=email,
+            email=clean_email,
             password_hash=hashed_password,
-            company_name=company_name,
+            company_name=company_name.strip() if company_name else "",
             is_active=True,
         )
 
@@ -118,8 +119,9 @@ class AuthService:
 
         Returns a dict with success status and user + token, or error message.
         """
+        clean_email = email.strip().lower() if email else ""
         # Find user by email
-        user = self.db.query(User).filter(User.email == email).first()
+        user = self.db.query(User).filter(User.email == clean_email).first()
 
         if not user:
             return {

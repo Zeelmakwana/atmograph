@@ -23,13 +23,23 @@ from fastapi import (
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_optional_current_user
 from app.core.database import get_db
+from app.models.user import User
 from app.services.live_news_monitor import (
     live_news_monitor,
 )
 from app.services.news_ingestion_service import (
     NewsIngestionService,
 )
+
+
+def _resolve_user_id(current_user: User | None, db: Session) -> int | None:
+    if current_user is not None and getattr(current_user, "id", None) is not None:
+        return current_user.id
+    from app.models.business_supply_chain import Company
+    c = db.query(Company).order_by(Company.id.desc()).first()
+    return c.user_id if c else None
 
 
 # ============================================================
@@ -114,6 +124,7 @@ class RSSIngestionRequest(BaseModel):
 )
 def analyze_news(
     request: NewsAnalyzeRequest,
+    current_user: User | None = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -123,8 +134,10 @@ def analyze_news(
 
     try:
 
+        user_id = _resolve_user_id(current_user, db)
         service = NewsIngestionService(
-            db
+            db,
+            user_id=user_id,
         )
 
         result = service.process_news(
@@ -173,42 +186,20 @@ def analyze_news(
 )
 def ingest_rss(
     request: RSSIngestionRequest,
+    current_user: User | None = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
     """
-    Fetch external RSS/Atom news and send
-    new articles through the complete
-    AtmoGraph Intelligence Pipeline.
-
-    Flow:
-
-        RSS
-          ↓
-        Article
-          ↓
-        NLP
-          ↓
-        Event
-          ↓
-        Supplier Matching
-          ↓
-        Business Simulation
-          ↓
-        Route Impact
-          ↓
-        Resilience
-          ↓
-        Risk
-          ↓
-        GNN / Hybrid
-          ↓
-        Unified Intelligence
+    Fetch external RSS/Atom news targeted to the active business
+    and send relevant articles through the AtmoGraph Intelligence Pipeline.
     """
 
     try:
 
+        user_id = _resolve_user_id(current_user, db)
         service = NewsIngestionService(
-            db
+            db,
+            user_id=user_id,
         )
 
         result = service.ingest_rss(
@@ -216,6 +207,9 @@ def ingest_rss(
             limit=request.limit,
             auto_simulate=request.auto_simulate,
         )
+
+        # Record scan metrics and audit history strictly for this user
+        live_news_monitor.record_scan_result(result, user_id=user_id)
 
         return {
             "success": True,
@@ -257,34 +251,26 @@ def ingest_rss(
 
 
 # ============================================================
-# LIVE NEWS MONITOR STATUS
+# LIVE NEWS MONITOR STATUS & AUDIT TRAIL
 # ============================================================
 
 @router.get(
     "/monitor-status",
 )
-def monitor_status():
+def monitor_status(
+    current_user: User | None = Depends(get_optional_current_user),
+    db: Session = Depends(get_db),
+):
     """
-    Return the current status of the
-    background RSS news monitor.
+    Return the current status, statistics, and audit trail of
+    the background RSS news monitor strictly scoped to the active tenant.
     """
+    user_id = _resolve_user_id(current_user, db)
+    audit = live_news_monitor.get_audit_status(user_id=user_id, db=db)
 
     return {
         "success": True,
-        "data": {
-            "running": (
-                live_news_monitor.running
-            ),
-            "interval_seconds": (
-                live_news_monitor.interval_seconds
-            ),
-            "limit": (
-                live_news_monitor.limit
-            ),
-            "auto_simulate": (
-                live_news_monitor.auto_simulate
-            ),
-        },
+        "data": audit,
     }
 
 

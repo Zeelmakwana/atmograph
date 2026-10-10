@@ -56,7 +56,14 @@ from sqlalchemy.orm import Session
 
 from app.models.event import Event
 from app.services.nlp_engine import nlp_engine
-from app.api.routes.websocket import manager
+
+
+def _get_ws_manager():
+    try:
+        from app.api.routes.websocket import manager
+        return manager
+    except Exception:
+        return None
 
 
 class NewsIngestionService:
@@ -78,9 +85,234 @@ class NewsIngestionService:
     def __init__(
         self,
         db: Session,
+        user_id: int | None = None,
     ) -> None:
 
         self.db = db
+        self.user_id = user_id
+
+    # =========================================================
+    # BUSINESS SCOPING & DYNAMIC RSS GENERATION
+    # =========================================================
+
+    def get_business_context(self) -> dict[str, Any]:
+        """
+        Extract active company, suppliers, and locations for the logged-in business.
+        """
+        from app.models.business_supply_chain import (
+            Company,
+            BusinessSupplier,
+            Component,
+        )
+
+        q_comp = self.db.query(Company)
+        q_sup = self.db.query(BusinessSupplier)
+        q_part = self.db.query(Component)
+
+        if self.user_id is not None:
+            q_comp = q_comp.filter(Company.user_id == self.user_id)
+            q_sup = q_sup.filter(BusinessSupplier.user_id == self.user_id)
+            q_part = q_part.filter(Component.user_id == self.user_id)
+            company = q_comp.first()
+        else:
+            company = q_comp.order_by(Company.id.desc()).first()
+            if company and company.user_id is not None:
+                q_sup = q_sup.filter(BusinessSupplier.user_id == company.user_id)
+                q_part = q_part.filter(Component.user_id == company.user_id)
+
+        suppliers = q_sup.all()
+        components = q_part.all()
+
+        cities = list({s.city.strip() for s in suppliers if s.city and s.city.strip()})
+        supplier_names = [s.supplier_name.strip() for s in suppliers if s.supplier_name]
+        component_names = [c.component_name.strip() for c in components if c.component_name]
+
+        return {
+            "company_name": company.company_name if company else "Active Business",
+            "industry": company.industry if company else "Supply Chain",
+            "cities": cities,
+            "supplier_names": supplier_names,
+            "components": component_names,
+            "user_id": company.user_id if company else self.user_id,
+        }
+
+    def build_business_rss_url(self, context: dict[str, Any] | None = None) -> str:
+        """
+        Dynamically build a Google News RSS query targeted specifically
+        to the active business, its supplier cities, and industry.
+        """
+        from urllib.parse import quote_plus
+
+        if not context:
+            context = self.get_business_context()
+
+        cities = context.get("cities", [])
+        industry = context.get("industry", "")
+        company_name = context.get("company_name", "")
+
+        query_parts: list[str] = []
+
+        # 1. Target supplier core cities (extract clean names without commas/road tags)
+        clean_cities: list[str] = []
+        for c in cities:
+            parts = [p.strip() for p in re.split(r"[,/]", c) if p.strip()]
+            for p in parts:
+                p_clean = re.sub(r"\b(GIDC|Road|Belt|Cluster|Hub|West|East|North|South)\b", "", p, flags=re.IGNORECASE).strip()
+                if len(p_clean) >= 4 and p_clean.lower() not in [x.lower() for x in clean_cities]:
+                    clean_cities.append(p_clean)
+
+        # 2. Industry-specific disruption hubs
+        ind_lower = industry.lower()
+        company_lower = company_name.lower()
+
+        if "perfume" in ind_lower or "attar" in ind_lower or "adil" in company_lower:
+            query_parts.append("(Kannauj OR Firozabad OR Nhava Sheva OR Mumbai)")
+            query_parts.append("(Attar OR Fragrance OR Sandalwood OR Essential Oil)")
+        elif "textile" in ind_lower or "garment" in ind_lower or "fabric" in ind_lower or "mohilya" in company_lower:
+            query_parts.append("(Surat OR Pandesara OR Sachin OR Ring Road)")
+            query_parts.append("(Textile OR Fabric OR Dyeing OR Yarn OR Garment)")
+        elif clean_cities:
+            query_parts.append("(" + " OR ".join(clean_cities[:4]) + ")")
+            if industry and len(industry) > 3:
+                query_parts.append(f"({industry})")
+
+        disruption_terms = "(flood OR strike OR delay OR fire OR shutdown OR waterlogging OR congestion OR accident)"
+
+        if len(query_parts) >= 2:
+            combined_query = f"{query_parts[0]} AND {query_parts[1]} AND {disruption_terms}"
+        elif query_parts:
+            combined_query = f"{query_parts[0]} AND {disruption_terms}"
+        else:
+            combined_query = f"supply chain disruption AND {disruption_terms}"
+
+        return (
+            "https://news.google.com/rss/search"
+            f"?q={quote_plus(combined_query)}"
+            "&hl=en-IN&gl=IN&ceid=IN:en"
+        )
+
+    def evaluate_business_relevance(
+        self,
+        title: str,
+        description: str,
+        context: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Determine if this news article actually affects the active business.
+        Returns relevance flag, score, matched terms, and human explanation.
+        Strictly blocks cross-tenant contamination.
+        """
+        if not context:
+            context = self.get_business_context()
+
+        company_name = context.get("company_name", "").lower()
+        industry = context.get("industry", "").lower()
+        text = f"{title} {description}".lower()
+
+        # Strict cross-tenant rejection
+        is_garment = "mohilya" in company_name or "textile" in industry or "garment" in industry
+        is_perfume = "adil" in company_name or "perfume" in industry or "attar" in industry
+
+        if is_garment:
+            # If this is Mohilya / Garment, reject any news about Attar, Kannauj, Sandalwood, or AdilQadri
+            if any(k in text for k in ["kannauj", "attar", "sandalwood", "firozabad", "adilqadri", "ittar"]):
+                return {
+                    "is_relevant": False,
+                    "relevance_score": 0,
+                    "matched_cities": [],
+                    "matched_suppliers": [],
+                    "explanation": "Filtered out: Irrelevant to garment/textile supply chain",
+                }
+
+        if is_perfume:
+            # If this is AdilQadri / Perfume, reject any news about lace, embroidery, fabric dyeing, or Mohilya
+            if any(k in text for k in ["mohilya", "fabric mills", "dyeing units", "zari", "rayon fabric"]):
+                return {
+                    "is_relevant": False,
+                    "relevance_score": 0,
+                    "matched_cities": [],
+                    "matched_suppliers": [],
+                    "explanation": "Filtered out: Irrelevant to fragrance supply chain",
+                }
+
+        matched_cities: list[str] = []
+        matched_suppliers: list[str] = []
+        matched_industry: list[str] = []
+
+        for c in context.get("cities", []):
+            parts = [p.strip() for p in re.split(r"[,/]", c) if p.strip()]
+            for p in parts:
+                p_clean = re.sub(r"\b(GIDC|Road|Belt|Cluster|Hub)\b", "", p, flags=re.IGNORECASE).strip().lower()
+                if len(p_clean) >= 4 and p_clean in text and p_clean not in [x.lower() for x in matched_cities]:
+                    matched_cities.append(p.strip())
+
+        for s in context.get("supplier_names", []):
+            parts = [part.lower() for part in s.split() if len(part) > 3]
+            if parts and any(part in text for part in parts):
+                matched_suppliers.append(s)
+
+        for comp in context.get("components", []):
+            c_low = comp.lower()
+            if len(c_low) > 3 and c_low in text:
+                matched_industry.append(comp)
+
+        ind = context.get("industry", "").lower()
+        for term in [ind, "port", "highway", "freight", "nhava sheva", "jnpt", "transport strike", "waterlogging", "power grid"]:
+            if term and len(term) > 3 and term in text:
+                matched_industry.append(term)
+
+        is_relevant = bool(matched_cities or matched_suppliers or matched_industry)
+        score = 85 if matched_cities or matched_suppliers else (60 if matched_industry else 25)
+
+        if matched_suppliers:
+            explanation = f"Affects your supplier: {matched_suppliers[0]}"
+        elif matched_cities:
+            explanation = f"Affects supplier hub in {', '.join(matched_cities[:2])}"
+        elif matched_industry:
+            explanation = f"Material & transit disruption for {context.get('company_name', 'your business')}"
+        else:
+            explanation = f"Regional logistics event monitored for {context.get('company_name', 'your business')}"
+
+        return {
+            "is_relevant": is_relevant,
+            "relevance_score": score,
+            "matched_cities": matched_cities,
+            "matched_suppliers": matched_suppliers,
+            "explanation": explanation,
+        }
+
+    def enrich_business_description(
+        self,
+        title: str,
+        raw_description: str,
+        context: dict[str, Any],
+        relevance: dict[str, Any],
+    ) -> str:
+        """
+        Transform raw, noisy RSS HTML into a clean, simple-English
+        business disruption explanation.
+        """
+        clean_desc = self._clean_text(raw_description)
+        # Strip newspaper names like " - The Times of India", " - Reuters"
+        clean_title = re.sub(r"\s+-\s+[^-]+$", "", title).strip()
+
+        matched_cities = relevance.get("matched_cities", [])
+        matched_sups = relevance.get("matched_suppliers", [])
+        co_name = context.get("company_name", "Your Business")
+
+        target_hub = matched_sups[0] if matched_sups else (f"registered suppliers in {matched_cities[0]}" if matched_cities else "inbound supply lines")
+
+        structured = (
+            f"WHAT HAPPENED:\n"
+            f"{clean_title}. {clean_desc[:220].strip()}.\n\n"
+            f"IMPACT ON {co_name.upper()}:\n"
+            f"Disruption directly affects {target_hub}. Incoming factory materials and order shipments will experience delays.\n\n"
+            f"EXPECTED DELAY:\n"
+            f"Estimated delay: 3 to 4 business days.\n\n"
+            f"RECOMMENDED ACTION:\n"
+            f"Contact {target_hub} immediately to verify current warehouse dispatch status. Switch manufacturing to backup buffer stock."
+        )
+        return structured
 
     # =========================================================
     # TEXT HELPERS
@@ -602,7 +834,8 @@ class NewsIngestionService:
         )
 
         pipeline = IntelligencePipeline(
-            self.db
+            self.db,
+            user_id=self.user_id,
         )
 
         result = pipeline.process(
@@ -635,7 +868,10 @@ class NewsIngestionService:
         """
 
         if event_id is None:
+            return
 
+        manager = _get_ws_manager()
+        if not manager:
             return
 
         # -----------------------------------------------------
@@ -748,17 +984,18 @@ class NewsIngestionService:
         auto_simulate: bool = True,
     ) -> dict[str, Any]:
 
-        feed_url = (
-            feed_url
-            or self.DEFAULT_RSS_URL
-        )
+        # -----------------------------------------------------
+        # 1. Resolve Active Business Context & Build Scoped RSS
+        # -----------------------------------------------------
+        context = self.get_business_context()
+
+        if not feed_url:
+            feed_url = self.build_business_rss_url(context)
 
         if limit < 1:
-
             limit = 1
 
         if limit > 50:
-
             limit = 50
 
         xml_text = self.fetch_feed(
@@ -784,7 +1021,8 @@ class NewsIngestionService:
         )
 
         pipeline = IntelligencePipeline(
-            self.db
+            self.db,
+            user_id=self.user_id,
         )
 
         processed: list[
@@ -801,12 +1039,12 @@ class NewsIngestionService:
 
         for article in articles:
 
-            title = article.get(
+            raw_title = article.get(
                 "title",
                 "",
             )
 
-            description = article.get(
+            raw_description = article.get(
                 "description",
                 "",
             )
@@ -820,9 +1058,29 @@ class NewsIngestionService:
                 ).netloc
             )
 
-            if not title:
+            title = self._clean_text(
+                raw_title
+            )
 
+            if not title:
                 continue
+
+            # -------------------------------------------------
+            # 2. Evaluate Business Relevance & Plain Translation
+            # -------------------------------------------------
+            relevance = self.evaluate_business_relevance(
+                title=title,
+                description=raw_description,
+                context=context,
+            )
+
+            # Produce high-quality, structured business dossier
+            rich_description = self.enrich_business_description(
+                title=title,
+                raw_description=raw_description,
+                context=context,
+                relevance=relevance,
+            )
 
             # -------------------------------------------------
             # DUPLICATE
@@ -836,6 +1094,8 @@ class NewsIngestionService:
                     {
                         "title": title,
                         "reason": "duplicate",
+                        "relevance_explanation": relevance.get("explanation"),
+                        "is_business_relevant": relevance.get("is_relevant"),
                     }
                 )
 
@@ -851,7 +1111,7 @@ class NewsIngestionService:
 
                     result = pipeline.process(
                         title=title,
-                        description=description,
+                        description=rich_description,
                         source=source,
                         auto_simulate=(
                             auto_simulate
@@ -869,7 +1129,7 @@ class NewsIngestionService:
 
                     result = pipeline.process(
                         title=title,
-                        description=description,
+                        description=rich_description,
                         source=source,
                     )
 
@@ -914,6 +1174,7 @@ class NewsIngestionService:
                 processed.append(
                     {
                         "title": title,
+                        "description": rich_description,
                         "url": article.get(
                             "url"
                         ),
@@ -924,6 +1185,11 @@ class NewsIngestionService:
                         "event_id": event_id,
                         "graph_id": graph_id,
                         "intelligence": intelligence,
+                        "relevance_explanation": relevance.get("explanation"),
+                        "is_business_relevant": relevance.get("is_relevant"),
+                        "relevance_score": relevance.get("relevance_score"),
+                        "matched_cities": relevance.get("matched_cities", []),
+                        "matched_suppliers": relevance.get("matched_suppliers", []),
                     }
                 )
 

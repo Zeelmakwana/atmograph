@@ -17,10 +17,20 @@ type HistoricalEvent = {
 
 type Props = {
   onActivate?: (event: HistoricalEvent) => void | Promise<void>;
+  onNavigateToCatalog?: () => void;
 };
 
 const API_BASE =
   "http://127.0.0.1:8000";
+
+function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem("atmograph_token");
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
 
 function eventIdOf(event: HistoricalEvent) {
   const value = Number(
@@ -56,6 +66,7 @@ function formatDate(value: unknown) {
 
 export default function HistoricalIntelligence({
   onActivate,
+  onNavigateToCatalog,
 }: Props) {
   const [events, setEvents] = useState<
     HistoricalEvent[]
@@ -136,7 +147,8 @@ export default function HistoricalIntelligence({
       }
 
       const response = await fetch(
-        `${API_BASE}/api/historical-intelligence/history?${params.toString()}`
+        `${API_BASE}/api/historical-intelligence/history?${params.toString()}`,
+        { headers: getAuthHeaders() }
       );
 
       if (!response.ok) {
@@ -174,7 +186,8 @@ export default function HistoricalIntelligence({
   const loadClusters = async () => {
     try {
       const response = await fetch(
-        `${API_BASE}/api/historical-intelligence/clusters?limit=500`
+        `${API_BASE}/api/historical-intelligence/clusters?limit=500`,
+        { headers: getAuthHeaders() }
       );
 
       if (!response.ok) {
@@ -212,7 +225,8 @@ export default function HistoricalIntelligence({
       setSelectedEvent(event);
 
       const response = await fetch(
-        `${API_BASE}/api/historical-intelligence/timeline/${id}`
+        `${API_BASE}/api/historical-intelligence/timeline/${id}`,
+        { headers: getAuthHeaders() }
       );
 
       if (!response.ok) {
@@ -259,7 +273,8 @@ export default function HistoricalIntelligence({
       setSelectedEvent(event);
 
       const response = await fetch(
-        `${API_BASE}/api/historical-intelligence/replay/${id}`
+        `${API_BASE}/api/historical-intelligence/replay/${id}`,
+        { headers: getAuthHeaders() }
       );
 
       if (!response.ok) {
@@ -745,12 +760,59 @@ export default function HistoricalIntelligence({
             }
           )}
 
-          {!events.length &&
-            !loading && (
-              <div className="empty-state">
-                No historical events found.
+          {!events.length && !loading && (
+            <div
+              style={{
+                padding: "48px 24px",
+                textAlign: "center",
+                background: "#f8fafc",
+                borderRadius: "12px",
+                border: "1px dashed #cbd5e1",
+                margin: "12px 0",
+              }}
+            >
+              <div
+                style={{
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "50%",
+                  background: "#eff6ff",
+                  color: "#2563eb",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 14px",
+                  fontSize: "24px",
+                }}
+              >
+                📜
               </div>
-            )}
+              <h4 style={{ margin: "0 0 6px", fontSize: "17px", fontWeight: 700, color: "#0f172a" }}>
+                No Historical Incidents Recorded Yet
+              </h4>
+              <p style={{ margin: "0 0 20px", fontSize: "13.5px", color: "#64748b", maxWidth: "500px", marginInline: "auto", lineHeight: 1.5 }}>
+                Your business incident archive is completely clean. When live disruptions are detected or simulated for your registered suppliers, they will automatically appear here with full timelines and replay features.
+              </p>
+              {onNavigateToCatalog && (
+                <button
+                  type="button"
+                  className="primary-action-btn"
+                  style={{
+                    padding: "9px 22px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                  }}
+                  onClick={onNavigateToCatalog}
+                >
+                  Upload Supply Chain Excel
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
 

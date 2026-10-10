@@ -87,23 +87,39 @@ export default function DashboardOverview({
         setSuppliers(sups);
         if (sups.length > 0) {
           setSelectedSupplierId(sups[0].supplier_id);
-        }
 
-        // Check for last simulation in localStorage safely
-        const cached = localStorage.getItem("atmograph:last-supplier-simulation");
-        if (cached) {
-          try {
-            const parsed = JSON.parse(cached);
-            if (parsed && typeof parsed === "object") {
-              const res = parsed.result;
-              if (res && typeof res === "object" && res.summary) {
-                setSimulation(res);
-                if (parsed.supplier_id) setSelectedSupplierId(parsed.supplier_id);
+          // Check for last simulation in localStorage safely
+          const cached = localStorage.getItem("atmograph:last-supplier-simulation");
+          if (cached) {
+            try {
+              const parsed = JSON.parse(cached);
+              if (parsed && typeof parsed === "object") {
+                // Ensure this simulation belongs to one of this tenant's suppliers
+                const belongsToUser = sups.some(
+                  (s) => s.supplier_id === parsed.supplier_id
+                );
+                if (belongsToUser) {
+                  const res = parsed.result;
+                  if (res && typeof res === "object" && res.summary) {
+                    setSimulation(res);
+                    if (parsed.supplier_id) setSelectedSupplierId(parsed.supplier_id);
+                  }
+                } else {
+                  // Foreign simulation from another account, purge it
+                  localStorage.removeItem("atmograph:last-supplier-simulation");
+                  setSimulation(null);
+                }
               }
+            } catch {
+              localStorage.removeItem("atmograph:last-supplier-simulation");
+              setSimulation(null);
             }
-          } catch {
-            // ignore
           }
+        } else {
+          // Zero suppliers: ensure fresh clean state
+          setSelectedSupplierId("");
+          setSimulation(null);
+          localStorage.removeItem("atmograph:last-supplier-simulation");
         }
       } catch (err) {
         console.error("Dashboard data load error:", err);
@@ -153,10 +169,10 @@ export default function DashboardOverview({
     }
   };
 
-  const totalSuppliers = suppliers.length || catalog?.suppliers?.length || 8;
-  const totalProducts = catalog?.products?.length || 8;
-  const totalComponents = catalog?.components?.length || 13;
-  const totalPlants = catalog?.plants?.length || 1;
+  const totalSuppliers = suppliers.length || catalog?.suppliers?.length || 0;
+  const totalProducts = catalog?.products?.length || 0;
+  const totalComponents = catalog?.components?.length || 0;
+  const totalPlants = catalog?.plants?.length || 0;
 
   const currentSupplier = suppliers.find((s) => s.supplier_id === selectedSupplierId) || suppliers[0];
   const isStoppage = simulation?.summary?.production_stop;
@@ -280,16 +296,72 @@ export default function DashboardOverview({
         </div>
       </div>
 
-      {/* 3. Interactive Disruption Sandbox (Simulate Outage in 1 Click) */}
-      <div
-        className="modern-card"
-        style={{
-          background: "#ffffff",
-          border: "1px solid #cbd5e1",
-          padding: "22px",
-          boxShadow: "0 2px 6px rgba(15, 23, 42, 0.05)",
-        }}
-      >
+      {totalSuppliers === 0 ? (
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px dashed #cbd5e1",
+            borderRadius: "14px",
+            padding: "48px 24px",
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
+          }}
+        >
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              borderRadius: "50%",
+              background: "#eff6ff",
+              color: "#2563eb",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "16px",
+            }}
+          >
+            <FileSpreadsheet size={30} />
+          </div>
+          <h3 style={{ margin: "0 0 8px", fontSize: "20px", fontWeight: 700, color: "#0f172a" }}>
+            Welcome to AtmoGraph! No Suppliers Registered Yet
+          </h3>
+          <p style={{ margin: "0 0 24px", fontSize: "14px", color: "#64748b", maxWidth: "560px", lineHeight: 1.6 }}>
+            To check disruption risks, see factory stoppage alerts, and simulate supplier delays,
+            upload your business's supply chain Excel file. All calculations and simulations will be tailored strictly to your data.
+          </p>
+          <button
+            className="primary-action-btn"
+            style={{
+              padding: "11px 26px",
+              fontSize: "14px",
+              fontWeight: 600,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+              boxShadow: "0 2px 8px rgba(37, 99, 235, 0.3)",
+            }}
+            onClick={() => onNavigate("catalog")}
+          >
+            <FileSpreadsheet size={17} />
+            <span>Upload Supply Chain Excel</span>
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* 3. Interactive Disruption Sandbox (Simulate Outage in 1 Click) */}
+          <div
+            className="modern-card"
+            style={{
+              background: "#ffffff",
+              border: "1px solid #cbd5e1",
+              padding: "22px",
+              boxShadow: "0 2px 6px rgba(15, 23, 42, 0.05)",
+            }}
+          >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{ width: 38, height: 38, borderRadius: "10px", background: "#fee2e2", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -659,6 +731,8 @@ export default function DashboardOverview({
           ))}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

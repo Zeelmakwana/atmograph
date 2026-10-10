@@ -56,6 +56,7 @@ export default function ExcelDataImport({
 
   const [validationResult, setValidationResult] = useState<SupplyChainValidationResult | null>(null);
   const [importResult, setImportResult] = useState<SupplyChainImportResult | null>(null);
+  const [syncResult, setSyncResult] = useState<any>(null);
   const [catalog, setCatalog] = useState<SupplyChainCatalog | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +114,7 @@ export default function ExcelDataImport({
     setError(null);
     setValidationResult(null);
     setImportResult(null);
+    setSyncResult(null);
   };
 
   const handleValidate = async () => {
@@ -133,6 +135,7 @@ export default function ExcelDataImport({
     if (!file) return;
     setImporting(true);
     setError(null);
+    setSyncResult(null);
     try {
       const result = await importSupplyChainFile(file);
       setImportResult(result);
@@ -148,11 +151,29 @@ export default function ExcelDataImport({
   const handleSyncGraph = async () => {
     setSyncingGraph(true);
     setError(null);
+    setSyncResult(null);
     try {
-      await syncNeo4jGraph();
+      const res = await syncNeo4jGraph();
+      setSyncResult(res);
       await loadCatalog();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Graph synchronization failed.");
+      window.dispatchEvent(new CustomEvent("atmograph:workspace-changed"));
+    } catch (err: any) {
+      let msg = "Graph synchronization failed.";
+      if (typeof err?.message === "string") {
+        try {
+          const parsed = JSON.parse(err.message);
+          if (parsed?.errors && Array.isArray(parsed.errors) && parsed.errors.length > 0) {
+            msg = parsed.errors.join("; ");
+          } else if (parsed?.detail) {
+            msg = typeof parsed.detail === "string" ? parsed.detail : JSON.stringify(parsed.detail);
+          } else {
+            msg = err.message;
+          }
+        } catch {
+          msg = err.message;
+        }
+      }
+      setError(msg);
     } finally {
       setSyncingGraph(false);
     }
@@ -507,6 +528,38 @@ export default function ExcelDataImport({
               </strong>
               <small style={{ display: "block", color: "#475569" }}>
                 Your data is saved and {importResult.neo4j_sync?.graph?.nodes ?? 0} points are ready on the map.
+              </small>
+            </div>
+            <button
+              className="sc-primary-button"
+              style={{ marginLeft: "auto", background: "#2563eb", color: "#ffffff" }}
+              onClick={onNavigateToGraph}
+            >
+              <Network size={15} />
+              Open Supply Chain Map
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Graph Sync Result Success Box */}
+      {syncResult && !importResult && (
+        <div
+          className="sc-panel"
+          style={{
+            padding: "20px",
+            borderLeft: "4px solid #16a34a",
+            background: "rgba(22, 163, 74, 0.08)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px", flexWrap: "wrap" }}>
+            <CheckCircle2 size={22} color="#16a34a" />
+            <div>
+              <strong style={{ color: "#0f172a", fontSize: "16px" }}>
+                Supply Chain Map Synced Successfully!
+              </strong>
+              <small style={{ display: "block", color: "#475569" }}>
+                {syncResult.graph?.nodes ?? 0} entities and {syncResult.graph?.relationships ?? 0} connections are active on your interactive graph.
               </small>
             </div>
             <button

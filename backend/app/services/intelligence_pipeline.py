@@ -1126,6 +1126,13 @@ class IntelligencePipeline:
         estimated_delay: float,
     ) -> dict[str, Any]:
 
+        if not self.neo4j.verify_connection():
+            return {
+                "success": False,
+                "offline": True,
+                "message": "Neo4j is offline. Saved to SQL."
+            }
+
         try:
 
             self.neo4j.create_event(

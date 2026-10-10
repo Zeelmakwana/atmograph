@@ -243,6 +243,20 @@ class SupplyChainNeo4jImporter:
         session,
     ) -> None:
 
+        legacy_drops = [
+            "DROP CONSTRAINT sc_company_id IF EXISTS",
+            "DROP CONSTRAINT sc_supplier_id IF EXISTS",
+            "DROP CONSTRAINT sc_plant_id IF EXISTS",
+            "DROP CONSTRAINT sc_product_id IF EXISTS",
+            "DROP CONSTRAINT sc_component_id IF EXISTS",
+            "DROP CONSTRAINT sc_warehouse_id IF EXISTS",
+        ]
+        for query in legacy_drops:
+            try:
+                session.run(query)
+            except Exception:
+                pass
+
         queries = [
             """
             CREATE INDEX sc_company_lookup IF NOT EXISTS
