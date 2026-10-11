@@ -103,10 +103,7 @@ STEP 4: REGISTER / LOGIN & LOAD DEMO DATA
 --------------------------------------------------------------------
 1. When http://localhost:5173 opens in your browser, click "Register".
 2. Enter any Email and Password of your choice.
-3. In "Company Name", type either:
-   - "Mohilya Couture"  (Automatically loads Surat textile dataset)
-   OR
-   - "AdilQadri Perfumes" (Automatically loads perfumes/attar dataset)
+3. In "Company Name", enter company name 
 4. Click "Create Account".
 5. The full dashboard, Interactive Graph, Simulator, and Radar will open!
 
