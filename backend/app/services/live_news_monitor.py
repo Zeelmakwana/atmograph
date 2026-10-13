@@ -191,7 +191,7 @@ class LiveNewsMonitor:
         # Resolve user_id if not explicitly provided
         target_user = user_id
         if target_user is None and db is not None:
-            latest_co = db.query(Company).order_by(Company.id.desc()).first()
+            latest_co = db.query(Company).filter(Company.user_id.isnot(None)).order_by(Company.id.desc()).first()
             if latest_co and latest_co.user_id:
                 target_user = latest_co.user_id
         if target_user is None:
@@ -202,7 +202,7 @@ class LiveNewsMonitor:
         if db is not None:
             company = db.query(Company).filter(Company.user_id == target_user).first()
             if not company:
-                company = db.query(Company).order_by(Company.id.desc()).first()
+                company = db.query(Company).filter(Company.user_id.isnot(None)).order_by(Company.id.desc()).first()
 
         # Check how many suppliers this tenant actually has
         suppliers_count = 0
@@ -229,10 +229,14 @@ class LiveNewsMonitor:
         co_name = (company.company_name if company else "").lower()
         ind = (company.industry if company else "").lower()
 
-        is_garment = "mohilya" in co_name or "textile" in ind or "garment" in ind
-        is_perfume = "adil" in co_name or "perfume" in ind or "attar" in ind
+        is_garment = "mohilya" in co_name or "textile" in ind or "garment" in ind or "apparel" in ind or "bonkers" in co_name
+        is_perfume = "adil" in co_name or "perfume" in ind or "attar" in ind or "fragrance" in ind
 
-        # Get existing items for this user and filter out any cross-tenant leaks
+        # Get existing items for this user and filter by freshness (<= 72 hours) and industry
+        from datetime import datetime, timezone
+        now_dt = datetime.now(timezone.utc)
+        max_age_hours = 72.0
+
         raw_items = self.recent_articles_by_user.get(target_user, [])
         valid_items: list[dict[str, Any]] = []
         seen_titles: set[str] = set()
@@ -241,137 +245,31 @@ class LiveNewsMonitor:
             t_clean = (item.get("title") or "").strip().lower()
             if not t_clean or t_clean in seen_titles:
                 continue
+
+            # Strict 72-hour freshness check
+            date_cand = item.get("published_at") or item.get("detected_at")
+            if date_cand:
+                pub_dt, iso_pub = NewsIngestionService.parse_article_date(date_cand)
+                if pub_dt:
+                    age_h = (now_dt - pub_dt).total_seconds() / 3600.0
+                    if age_h > max_age_hours or age_h < -2.0:
+                        continue
+                    item["published_at"] = iso_pub
+
             text = f"{t_clean} {item.get('description', '')} {item.get('relevance_explanation', '')}".lower()
             if is_garment:
-                # Discard any perfume/kannauj/attar items
-                if any(k in text for k in ["kannauj", "attar", "sandalwood", "firozabad", "adilqadri", "ittar"]):
+                # Discard electronics, defense, missile, or perfume items
+                if any(k in text for k in ["kannauj", "attar", "sandalwood", "firozabad", "adilqadri", "ittar", "electronics", "semiconductor", "wafer fab", "drdo", "missile"]):
                     continue
             elif is_perfume:
-                # Discard any garment/surat fabric items
-                if any(k in text for k in ["mohilya", "surat ring road", "dyeing units", "zari", "rayon fabric"]):
+                # Discard garment/fabric or electronics items
+                if any(k in text for k in ["mohilya", "surat ring road", "dyeing units", "zari", "rayon fabric", "electronics", "semiconductor", "wafer fab", "missile", "drdo"]):
                     continue
             seen_titles.add(t_clean)
             valid_items.append(item)
 
-        # If empty, generate authentic, tailored disruption alerts for this tenant
-        if not valid_items:
-            if is_garment:
-                valid_items = [
-                    {
-                        "title": "Surat Ring Road Textile Market Flooding & Transport Halt",
-                        "description": (
-                            "WHAT HAPPENED:\n"
-                            "Heavy monsoon rain has caused severe waterlogging across Surat's Ring Road textile market, halting commercial truck movements.\n\n"
-                            "IMPACT ON MOHILYA COUTURE PRIVATE LIMITED:\n"
-                            "Direct disruption to Ring Road Textile Market Fabric Traders. Inbound fabric rolls cannot leave the market.\n\n"
-                            "EXPECTED DELAY:\n"
-                            "Estimated shipment delay: 3 to 4 business days.\n\n"
-                            "RECOMMENDED ACTION:\n"
-                            "Switch cutting schedule to reserve stock in main facility; request alternative dispatch via Surat-Hazira expressway."
-                        ),
-                        "source": "Surat Industrial Wire",
-                        "detected_at": now_iso,
-                        "status": "DISRUPTION_PROCESSED",
-                        "risk_score": 85,
-                        "risk_level": "HIGH",
-                        "relevance_explanation": "Affects your supplier: Ring Road Textile Market Fabric Traders (Surat)",
-                        "is_business_relevant": True,
-                        "user_id": target_user,
-                    },
-                    {
-                        "title": "Pandesara GIDC Dyeing Unit Industrial Transformer Power Grid Failure",
-                        "description": (
-                            "WHAT HAPPENED:\n"
-                            "Industrial power transformer breakdown in Pandesara GIDC interrupted steam boilers and fabric dyeing operations.\n\n"
-                            "IMPACT ON MOHILYA COUTURE PRIVATE LIMITED:\n"
-                            "Direct disruption to Pandesara GIDC Dyeing & Digital Print Units. Colored fabric batch completion is halted.\n\n"
-                            "EXPECTED DELAY:\n"
-                            "Estimated delay: 2 to 3 business days.\n\n"
-                            "RECOMMENDED ACTION:\n"
-                            "Reallocate dyeing priority to Sachin GIDC backup printing units."
-                        ),
-                        "source": "Gujarat Industrial Dispatch",
-                        "detected_at": now_iso,
-                        "status": "DISRUPTION_PROCESSED",
-                        "risk_score": 75,
-                        "risk_level": "HIGH",
-                        "relevance_explanation": "Affects your supplier: Pandesara GIDC Dyeing & Digital Print Units (Surat)",
-                        "is_business_relevant": True,
-                        "user_id": target_user,
-                    },
-                    {
-                        "title": "Bhagal-Salabatpura Zari & Lace Artisan Logistics Dispatch Dispute",
-                        "description": (
-                            "WHAT HAPPENED:\n"
-                            "Local transport dispute in old Surat (Bhagal area) halted tempo transport carrying embroidery trims and zari borders.\n\n"
-                            "IMPACT ON MOHILYA COUTURE PRIVATE LIMITED:\n"
-                            "Direct disruption to Bhagal-Salabatpura Lace & Trims Traders. Delivery of bridal border embellishments delayed.\n\n"
-                            "EXPECTED DELAY:\n"
-                            "Estimated delay: 2 business days.\n\n"
-                            "RECOMMENDED ACTION:\n"
-                            "Arrange direct factory pickup or deploy regional reserve trims."
-                        ),
-                        "source": "Surat Trade Wire",
-                        "detected_at": now_iso,
-                        "status": "DISRUPTION_PROCESSED",
-                        "risk_score": 60,
-                        "risk_level": "MEDIUM",
-                        "relevance_explanation": "Affects your supplier: Bhagal-Salabatpura Lace & Trims Traders (Surat)",
-                        "is_business_relevant": True,
-                        "user_id": target_user,
-                    },
-                ]
-            elif is_perfume:
-                valid_items = [
-                    {
-                        "title": "Flash Flooding on NH-91 Near Kannauj Blocks Attar Base Tankers",
-                        "description": (
-                            "WHAT HAPPENED:\n"
-                            "Flash flooding on NH-91 near Kannauj industrial area blocked delivery tankers carrying floral extracts and attar bases.\n\n"
-                            "IMPACT ON ADILQADRI E-COMMERCE PVT. LTD.:\n"
-                            "Direct disruption to Kannauj Attar Distillers. Essential floral attar base shipment delayed.\n\n"
-                            "EXPECTED DELAY:\n"
-                            "Estimated delay: 3 to 4 business days.\n\n"
-                            "RECOMMENDED ACTION:\n"
-                            "Dispatch emergency stock from Mumbai regional buffer warehouse."
-                        ),
-                        "source": "UP Logistics Monitor",
-                        "detected_at": now_iso,
-                        "status": "DISRUPTION_PROCESSED",
-                        "risk_score": 85,
-                        "risk_level": "HIGH",
-                        "relevance_explanation": "Affects your supplier: Kannauj Attar Distillers (Kannauj)",
-                        "is_business_relevant": True,
-                        "user_id": target_user,
-                    },
-                ]
-            else:
-                # Custom industry with active suppliers: generate tailored alerts from actual registered suppliers!
-                valid_items = []
-                if db is not None:
-                    db_sups = db.query(BusinessSupplier).filter(BusinessSupplier.user_id == target_user).limit(3).all()
-                    c_label = (company.company_name if company else "Your Business").upper()
-                    for sup in db_sups:
-                        loc = sup.city or sup.state or "Regional Port"
-                        valid_items.append({
-                            "title": f"Logistics Corridor & Highway Congestion Affecting {loc} Freight",
-                            "description": (
-                                f"WHAT HAPPENED:\nSevere monsoon traffic congestion and arterial road repairs have delayed outbound logistics near {loc}.\n\n"
-                                f"IMPACT ON {c_label}:\nDirect delivery delay from supplier {sup.supplier_name} ({loc}). Inbound components to your facility are held back.\n\n"
-                                f"EXPECTED DELAY:\nEstimated shipment delay: 2 to 3 business days.\n\n"
-                                f"RECOMMENDED ACTION:\nCheck local buffer inventory or re-route urgent orders via express courier."
-                            ),
-                            "source": f"{loc} Commercial News",
-                            "detected_at": now_iso,
-                            "status": "DISRUPTION_PROCESSED",
-                            "risk_score": 70,
-                            "risk_level": "HIGH",
-                            "relevance_explanation": f"Affects your supplier: {sup.supplier_name} ({loc})",
-                            "is_business_relevant": True,
-                            "user_id": target_user,
-                        })
-
-            self.recent_articles_by_user[target_user] = valid_items
+        # No fake fallback generation! Return genuine live alerts only.
+        self.recent_articles_by_user[target_user] = valid_items
 
         return {
             "running": self._running,
@@ -550,30 +448,37 @@ class LiveNewsMonitor:
 
             db = SessionLocal()
 
-            service = NewsIngestionService(db)
-
-            # ------------------------------------------------
-            # Existing ingestion pipeline.
-            # ------------------------------------------------
-
-            result = await asyncio.to_thread(
-                service.ingest_rss,
-                feed_url=self.feed_url,
-                limit=self.limit,
-                auto_simulate=self.auto_simulate,
+            from app.models.business_supply_chain import Company, BusinessSupplier
+            active_companies = (
+                db.query(Company)
+                .filter(Company.user_id.isnot(None))
+                .all()
             )
 
-            # Record audit and detected articles history
-            self.record_scan_result(result)
+            total_found = 0
+            total_processed = 0
+            total_skipped = 0
+            total_failed = 0
 
-            data = (
-                result.get(
-                    "data",
-                    result,
+            for comp in active_companies:
+                sups_count = db.query(BusinessSupplier).filter(BusinessSupplier.user_id == comp.user_id).count()
+                if sups_count == 0:
+                    continue
+
+                service = NewsIngestionService(db, user_id=comp.user_id)
+                result = await asyncio.to_thread(
+                    service.ingest_rss,
+                    feed_url=self.feed_url,
+                    limit=self.limit,
+                    auto_simulate=self.auto_simulate,
                 )
-                if isinstance(result, dict)
-                else {}
-            )
+                self.record_scan_result(result, user_id=comp.user_id)
+
+                data = result.get("data", result) if isinstance(result, dict) else {}
+                total_found += data.get("articles_found", 0)
+                total_processed += data.get("processed_count", 0)
+                total_skipped += data.get("skipped_count", 0)
+                total_failed += data.get("failed_count", 0)
 
             logger.info(
                 (

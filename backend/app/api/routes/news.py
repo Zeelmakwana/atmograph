@@ -38,7 +38,7 @@ def _resolve_user_id(current_user: User | None, db: Session) -> int | None:
     if current_user is not None and getattr(current_user, "id", None) is not None:
         return current_user.id
     from app.models.business_supply_chain import Company
-    c = db.query(Company).order_by(Company.id.desc()).first()
+    c = db.query(Company).filter(Company.user_id.isnot(None)).order_by(Company.id.desc()).first()
     return c.user_id if c else None
 
 

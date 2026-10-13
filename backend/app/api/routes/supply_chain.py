@@ -119,7 +119,7 @@ def _resolve_user_id(current_user: User | None, db: Session) -> int | None:
     if current_user and current_user.id:
         return current_user.id
     from app.models.business_supply_chain import Company
-    latest_company = db.query(Company).order_by(Company.id.desc()).first()
+    latest_company = db.query(Company).filter(Company.user_id.isnot(None)).order_by(Company.id.desc()).first()
     if latest_company and latest_company.user_id:
         return latest_company.user_id
     return None
