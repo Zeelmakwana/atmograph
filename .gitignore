@@ -255,3 +255,9 @@ data/imports/_validation_*
 
 # Local SQLite database
 backend/atmograph.db
+
+# Excluded from Git / GitHub
+docs/ATMOGRAPH_EXPLAINED.md
+*.pptx
+*.ppt
+ppt mid project/
