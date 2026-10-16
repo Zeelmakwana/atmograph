@@ -55,7 +55,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
             <Network size={32} />
           </div>
           <div className="auth-title">AtmoGraph</div>
-          <div className="auth-subtitle">Supply Chain Disruption Intelligence</div>
+          <div className="auth-subtitle">Sign in to check and protect your supply chain</div>
         </div>
 
         {/* Tab Switcher */}
@@ -64,13 +64,13 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
             className={`auth-tab ${isLogin ? "active" : ""}`}
             onClick={() => { setIsLogin(true); setError(""); }}
           >
-            Login
+            Sign In
           </button>
           <button
             className={`auth-tab ${!isLogin ? "active" : ""}`}
             onClick={() => { setIsLogin(false); setError(""); }}
           >
-            Register
+            Create Account
           </button>
         </div>
 
@@ -84,7 +84,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
               <input
                 type="email"
                 className="auth-input"
-                placeholder="you@company.com"
+                placeholder="name@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -120,7 +120,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
                 <input
                   type="text"
                   className="auth-input"
-                  placeholder="Your Company Pvt Ltd"
+                  placeholder="e.g. My Company Name"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   required
@@ -160,7 +160,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
             <span>
               New to AtmoGraph?{" "}
               <button className="auth-link" onClick={() => { setIsLogin(false); setError(""); }}>
-                Register your company
+                Create an account
               </button>
             </span>
           ) : (
@@ -180,97 +180,99 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #0a0a0b 0%, #141416 50%, #0a0a0b 100%);
+          background: #f8fafc;
           padding: 24px;
         }
 
         .auth-container {
           width: 100%;
           max-width: 420px;
-          background: rgba(20, 20, 22, 0.95);
+          background: #ffffff;
           border-radius: 16px;
-          border: 1px solid rgba(232, 168, 56, 0.15);
+          border: 1px solid #e2e8f0;
           padding: 40px 32px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
         }
 
         .auth-brand {
           text-align: center;
-          margin-bottom: 32px;
+          margin-bottom: 28px;
         }
 
         .auth-logo {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 64px;
-          height: 64px;
-          background: linear-gradient(135deg, rgba(232, 168, 56, 0.15), rgba(212, 148, 44, 0.1));
-          border-radius: 16px;
-          color: #e8a838;
-          margin-bottom: 16px;
+          width: 60px;
+          height: 60px;
+          background: rgba(37, 99, 235, 0.1);
+          border-radius: 14px;
+          color: #2563eb;
+          margin-bottom: 14px;
         }
 
         .auth-title {
-          font-size: 28px;
+          font-size: 26px;
           font-weight: 700;
-          color: #f8fafc;
+          color: #0f172a;
           letter-spacing: -0.5px;
         }
 
         .auth-subtitle {
           font-size: 13px;
-          color: #94a3b8;
+          color: #64748b;
           margin-top: 4px;
         }
 
         .auth-tabs {
           display: flex;
-          gap: 8px;
+          gap: 6px;
           margin-bottom: 24px;
           padding: 4px;
-          background: rgba(10, 10, 11, 0.5);
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
           border-radius: 8px;
         }
 
         .auth-tab {
           flex: 1;
-          padding: 10px 16px;
+          padding: 9px 16px;
           border: none;
           background: transparent;
-          color: #94a3b8;
-          font-size: 14px;
-          font-weight: 500;
+          color: #64748b;
+          font-size: 13px;
+          font-weight: 600;
           cursor: pointer;
           border-radius: 6px;
           transition: all 0.2s ease;
         }
 
         .auth-tab:hover {
-          color: #e8a838;
+          color: #0f172a;
         }
 
         .auth-tab.active {
-          background: rgba(232, 168, 56, 0.15);
-          color: #e8a838;
+          background: #2563eb;
+          color: #ffffff;
+          box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2);
         }
 
         .auth-form {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 18px;
         }
 
         .auth-field {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 7px;
         }
 
         .auth-label {
           font-size: 13px;
-          font-weight: 500;
-          color: #e2e8f0;
+          font-weight: 600;
+          color: #334155;
         }
 
         .auth-input-wrap {
@@ -282,37 +284,37 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
         .auth-input-icon {
           position: absolute;
           left: 14px;
-          color: #64748b;
+          color: #94a3b8;
           pointer-events: none;
         }
 
         .auth-input {
           width: 100%;
-          padding: 12px 14px 12px 42px;
-          background: rgba(10, 10, 11, 0.6);
-          border: 1px solid rgba(232, 168, 56, 0.2);
+          padding: 11px 14px 11px 40px;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
           border-radius: 8px;
-          color: #f8fafc;
+          color: #0f172a;
           font-size: 14px;
           transition: all 0.2s ease;
         }
 
         .auth-input:focus {
           outline: none;
-          border-color: #e8a838;
-          background: rgba(10, 10, 11, 0.8);
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
 
         .auth-input::placeholder {
-          color: #64748b;
+          color: #94a3b8;
         }
 
         .auth-error {
           padding: 12px 14px;
-          background: rgba(239, 68, 68, 0.1);
-          border: 1px solid rgba(239, 68, 68, 0.3);
+          background: #fef2f2;
+          border: 1px solid #fecaca;
           border-radius: 8px;
-          color: #f87171;
+          color: #b91c1c;
           font-size: 13px;
         }
 
@@ -321,20 +323,20 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
           align-items: center;
           justify-content: center;
           gap: 8px;
-          padding: 14px;
-          background: linear-gradient(135deg, #d4942c 0%, #e8a838 50%, #f0b848 100%);
+          padding: 12px;
+          background: #2563eb;
           border: none;
           border-radius: 8px;
-          color: #0a0a0b;
-          font-size: 15px;
+          color: #ffffff;
+          font-size: 14px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s ease;
         }
 
         .auth-submit:hover:not(:disabled) {
-          transform: translateY(-1px);
-          box-shadow: 0 8px 20px rgba(232, 168, 56, 0.3);
+          background: #1d4ed8;
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
         }
 
         .auth-submit:disabled {
@@ -355,14 +357,14 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
           margin-top: 24px;
           text-align: center;
           font-size: 13px;
-          color: #94a3b8;
+          color: #64748b;
         }
 
         .auth-link {
           background: none;
           border: none;
-          color: #e8a838;
-          font-weight: 500;
+          color: #2563eb;
+          font-weight: 600;
           cursor: pointer;
           text-decoration: none;
         }
@@ -377,7 +379,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
           }
 
           .auth-title {
-            font-size: 24px;
+            font-size: 22px;
           }
         }
       `}</style>

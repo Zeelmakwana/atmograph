@@ -59,11 +59,23 @@ async function request<T>(
   }
 
   if (!response.ok) {
-    const message =
+    let message =
       payload?.detail ||
       payload?.message ||
       payload?.error ||
       `Request failed with status ${response.status}`;
+
+    if (Array.isArray(message)) {
+      message = message
+        .map((m: any) =>
+          typeof m === "object" && m !== null
+            ? m.msg || m.message || JSON.stringify(m)
+            : String(m)
+        )
+        .join(", ");
+    } else if (typeof message === "object" && message !== null) {
+      message = message.msg || message.message || JSON.stringify(message);
+    }
 
     throw new Error(String(message));
   }
@@ -304,6 +316,23 @@ export function ingestNews(
       }),
     }
   );
+}
+
+export function ingestRssNews(limit = 5, autoSimulate = true) {
+  return request<any>(
+    "/api/news/ingest-rss",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        limit,
+        auto_simulate: autoSimulate,
+      }),
+    }
+  );
+}
+
+export function getNewsMonitorStatus() {
+  return request<any>("/api/news/monitor-status");
 }
 
 /* ============================================================

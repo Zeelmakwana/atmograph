@@ -214,10 +214,10 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
       {/* Header */}
       <div className="page-header-row">
         <div className="page-headline">
-          <span className="eyebrow-tag">WHAT-IF SCENARIO STUDIO</span>
-          <h2>Deterministic Disruption Simulator</h2>
+          <span className="eyebrow-tag">WHAT-IF TESTER</span>
+          <h2>Test What Happens If a Supplier Fails</h2>
           <p>
-            Simulate sudden supplier outages to evaluate alternative capacity recovery and downstream plant vulnerability.
+            Pick any supplier to see if your factory will run out of parts and which backup suppliers can help.
           </p>
         </div>
       </div>
@@ -228,8 +228,8 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
           <Zap size={20} />
         </div>
         <div className="sc-control-copy">
-          <strong>Select Target Supplier</strong>
-          <span>Simulate immediate failure and trace propagation</span>
+          <strong>Pick a Supplier</strong>
+          <span>Choose who is delayed or shut down</span>
         </div>
 
         <select
@@ -239,9 +239,9 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
           className="sc-select"
         >
           {loadingSuppliers ? (
-            <option value="">Loading suppliers from database...</option>
+            <option value="">Loading suppliers...</option>
           ) : suppliers.length === 0 ? (
-            <option value="">No suppliers found in database</option>
+            <option value="">No suppliers found</option>
           ) : (
             suppliers.map((s) => (
               <option key={s.supplier_id} value={s.supplier_id}>
@@ -259,12 +259,12 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
           {simulating ? (
             <>
               <Loader2 size={16} className="sc-spin" />
-              Simulating Disruption...
+              Running Test...
             </>
           ) : (
             <>
               <Zap size={16} />
-              Run Simulation
+              Run Test
             </>
           )}
         </button>
@@ -280,13 +280,13 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
       </div>
 
       {error && (
-        <div className="active-banner" style={{ background: "rgba(239, 68, 68, 0.12)", borderColor: "rgba(239, 68, 68, 0.3)" }}>
+        <div className="active-banner" style={{ background: "#fef2f2", borderColor: "#fecaca" }}>
           <div className="active-banner-left">
             <div className="active-banner-icon">
               <AlertTriangle size={18} />
             </div>
             <div>
-              <div className="active-banner-title">Simulation Error</div>
+              <div className="active-banner-title">Test Error</div>
               <div className="active-banner-sub">{error}</div>
             </div>
           </div>
@@ -299,9 +299,9 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
           <div className="sc-empty-icon">
             <Truck size={26} />
           </div>
-          <h3>Ready for Disruption Simulation</h3>
+          <h3>Ready to Test Your Suppliers</h3>
           <p>
-            Choose any supplier from your supply network above to compute gross lost volume, alternative recovery, inventory buffer days, and plant operational health.
+            Choose any supplier from the dropdown above and click <strong>"Run Test"</strong> to see if you have enough backup stock to avoid factory shutdowns.
           </p>
         </div>
       )}
@@ -310,19 +310,19 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
       {result && (
         <>
           {/* Active Supplier Failure Card */}
-          <div className="sc-failed-card">
-            <div className="sc-failed-icon">
+          <div className="sc-failed-card" style={{ background: "#fef2f2", border: "1px solid #fecaca" }}>
+            <div className="sc-failed-icon" style={{ background: "#fee2e2", color: "#dc2626" }}>
               <Truck size={20} />
             </div>
             <div>
-              <span className="sc-kicker">SIMULATED OUTAGE</span>
-              <strong style={{ fontSize: 16, color: "#f8fafc" }}>{result.supplier.name}</strong>
-              <small style={{ display: "block", color: "#94a3b8", marginTop: 2 }}>
+              <span className="sc-kicker" style={{ color: "#dc2626" }}>TESTED SUPPLIER</span>
+              <strong style={{ fontSize: 16, color: "#0f172a" }}>{result.supplier.name}</strong>
+              <small style={{ display: "block", color: "#64748b", marginTop: 2 }}>
                 {result.supplier.city ?? "HQ"}, {result.supplier.country ?? "Global"} · {result.supplier.supplier_id}
               </small>
             </div>
             <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
-              <span className="status-badge badge-critical">OUTAGE IN EFFECT</span>
+              <span className="status-badge badge-critical">DELAY TESTED</span>
             </div>
           </div>
 
@@ -330,46 +330,46 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
           <div className="metrics-row">
             <div className="metric-box">
               <div className="metric-info">
-                <span className="metric-label">GROSS LOST SUPPLY</span>
+                <span className="metric-label">LOST UNITS</span>
                 <span className="metric-value">{formatNumber(summary?.gross_lost_supply)}</span>
-                <span style={{ fontSize: "11px", color: "#94a3b8" }}>Allocated units</span>
+                <span style={{ fontSize: "11.5px", color: "#64748b" }}>Units not delivered</span>
               </div>
-              <div className="metric-icon-wrap" style={{ background: "rgba(239, 68, 68, 0.12)", color: "#f87171", borderColor: "rgba(239, 68, 68, 0.25)" }}>
+              <div className="metric-icon-wrap" style={{ background: "#fee2e2", color: "#dc2626", borderColor: "#fecaca" }}>
                 <TrendingDown size={18} />
               </div>
             </div>
 
             <div className="metric-box">
               <div className="metric-info">
-                <span className="metric-label">ALTERNATIVE RECOVERY</span>
-                <span className="metric-value">{formatNumber(summary?.alternative_recovery)}</span>
-                <span style={{ fontSize: "11px", color: "#34d399" }}>{recoveryPct}% Recovered</span>
+                <span className="metric-label">BACKUP UNITS AVAILABLE</span>
+                <span className="metric-value" style={{ color: "#16a34a" }}>{formatNumber(summary?.alternative_recovery)}</span>
+                <span style={{ fontSize: "11.5px", color: "#16a34a" }}>{recoveryPct}% from other suppliers</span>
               </div>
-              <div className="metric-icon-wrap" style={{ background: "rgba(16, 185, 129, 0.12)", color: "#34d399", borderColor: "rgba(16, 185, 129, 0.25)" }}>
+              <div className="metric-icon-wrap" style={{ background: "#f0fdf4", color: "#16a34a", borderColor: "#bbf7d0" }}>
                 <CheckCircle2 size={18} />
               </div>
             </div>
 
             <div className="metric-box">
               <div className="metric-info">
-                <span className="metric-label">NET SHORTAGE</span>
-                <span className="metric-value" style={{ color: (summary?.net_shortage ?? 0) > 0 ? "#f87171" : "#34d399" }}>
+                <span className="metric-label">FINAL SHORTAGE</span>
+                <span className="metric-value" style={{ color: (summary?.net_shortage ?? 0) > 0 ? "#dc2626" : "#16a34a" }}>
                   {formatNumber(summary?.net_shortage)}
                 </span>
-                <span style={{ fontSize: "11px", color: "#94a3b8" }}>Uncovered deficit</span>
+                <span style={{ fontSize: "11.5px", color: "#64748b" }}>Units still missing</span>
               </div>
-              <div className="metric-icon-wrap" style={{ background: "rgba(245, 158, 11, 0.12)", color: "#fbbf24", borderColor: "rgba(245, 158, 11, 0.25)" }}>
+              <div className="metric-icon-wrap" style={{ background: "#fffbeb", color: "#d97706", borderColor: "#fde68a" }}>
                 <Box size={18} />
               </div>
             </div>
 
             <div className="metric-box">
               <div className="metric-info">
-                <span className="metric-label">MAX DOWNSTREAM DELAY</span>
-                <span className="metric-value">{summary?.max_delay_days ?? 0}</span>
-                <span style={{ fontSize: "11px", color: "#94a3b8" }}>Transit + disruption days</span>
+                <span className="metric-label">MAX ESTIMATED DELAY</span>
+                <span className="metric-value">{summary?.max_delay_days ?? 0} Days</span>
+                <span style={{ fontSize: "11.5px", color: "#64748b" }}>Expected delay time</span>
               </div>
-              <div className="metric-icon-wrap" style={{ background: "rgba(56, 189, 248, 0.12)", color: "#38bdf8", borderColor: "rgba(56, 189, 248, 0.25)" }}>
+              <div className="metric-icon-wrap" style={{ background: "#eff6ff", color: "#2563eb", borderColor: "#bfdbfe" }}>
                 <Clock size={18} />
               </div>
             </div>
@@ -381,12 +381,12 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
               {summary?.production_stop ? <AlertTriangle size={22} /> : <CheckCircle2 size={22} />}
             </div>
             <div>
-              <span className="sc-kicker">EXECUTIVE DECISION SIGNAL</span>
-              <strong>{summary?.production_stop ? "CRITICAL PRODUCTION STOPPAGE PREDICTED" : "PRODUCTION PROTECTED VIA INVENTORY BUFFER"}</strong>
+              <span className="sc-kicker">{summary?.production_stop ? "ATTENTION NEEDED" : "ALL SAFE"}</span>
+              <strong>{summary?.production_stop ? "Warning: Factory Will Stop!" : "Safe: Backup Stock is Enough!"}</strong>
               <p>
                 {summary?.production_stop
-                  ? `Immediate supplier outage causes an unabsorbed deficit of ${formatNumber(summary?.net_shortage)} units. Direct intervention or rerouting required.`
-                  : `Current stock buffers absorb the estimated ${formatNumber(summary?.gross_lost_supply)} units of lost supply. Production lines can operate safely while alternate sourcing activates.`}
+                  ? `This supplier delay causes an uncovered deficit of ${formatNumber(summary?.net_shortage)} parts. Your factory lines will pause unless backup suppliers are contacted.`
+                  : `Your current warehouse stock covers the estimated ${formatNumber(summary?.gross_lost_supply)} delayed parts. Your factory can continue working while backup suppliers deliver.`}
               </p>
             </div>
           </div>
@@ -403,8 +403,8 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
                 <Factory size={16} />
               </div>
               <div>
-                <strong>Manufacturing Plants Status</strong>
-                <span>{result.plants.length} facilities monitored under this failure mode</span>
+                <strong>Factory Status</strong>
+                <span>{result.plants.length} factories checked under this scenario</span>
               </div>
             </div>
 
@@ -413,12 +413,12 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
                 const isStopped = plant.risk_score >= 80;
                 const isReduced = plant.risk_score >= 50 && plant.risk_score < 80;
                 const statusBadge = isStopped ? "badge-stopped" : isReduced ? "badge-reduced" : "badge-running";
-                const statusLabel = isStopped ? "STOPPED" : isReduced ? "REDUCED CAPACITY" : "RUNNING";
+                const statusLabel = isStopped ? "STOPPED" : isReduced ? "PARTIAL DELAY" : "RUNNING NORMALLY";
 
                 return (
                   <div className="sc-plant-row" key={plant.plant_id}>
                     <div className="sc-plant-main">
-                      <Factory size={18} color="#e8a838" />
+                      <Factory size={18} color="#2563eb" />
                       <div>
                         <strong>{plant.plant_name}</strong>
                         <small>{plant.plant_id}</small>
@@ -426,11 +426,11 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-                      <span style={{ color: "#94a3b8", fontSize: "12px" }}>
-                        <strong style={{ color: "#f8fafc" }}>{plant.affected_components}</strong> components affected
+                      <span style={{ color: "#64748b", fontSize: "12.5px" }}>
+                        <strong style={{ color: "#0f172a" }}>{plant.affected_components}</strong> parts affected
                       </span>
-                      <span style={{ color: "#94a3b8", fontSize: "12px" }}>
-                        <strong style={{ color: "#f8fafc" }}>{plant.max_delay_days}</strong> days delay
+                      <span style={{ color: "#64748b", fontSize: "12.5px" }}>
+                        <strong style={{ color: "#0f172a" }}>{plant.max_delay_days}</strong> days delay
                       </span>
                       <span className={`status-badge ${statusBadge}`}>{statusLabel}</span>
                     </div>
@@ -447,21 +447,21 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
                 <Layers size={16} />
               </div>
               <div>
-                <strong>Component Buffer & Inventory Depletion</strong>
-                <span>{result.components.length} components analyzed across affected plants</span>
+                <strong>Part Stock & Days of Supply Left</strong>
+                <span>{result.components.length} parts checked across factories</span>
               </div>
             </div>
 
             <div className="sc-table-wrap">
               <div className="sc-table">
                 <div className="sc-table-head">
-                  <span>COMPONENT</span>
-                  <span>TARGET PLANT</span>
-                  <span>LOST SUPPLY</span>
-                  <span>INVENTORY</span>
-                  <span>BUFFER DAYS</span>
-                  <span>DAILY DEMAND</span>
-                  <span>RISK LEVEL</span>
+                  <span>PART NAME</span>
+                  <span>FACTORY</span>
+                  <span>LOST UNITS</span>
+                  <span>IN STOCK</span>
+                  <span>STOCK RUNWAY</span>
+                  <span>DAILY USE</span>
+                  <span>STATUS</span>
                 </div>
 
                 {result.components.map((c: SimulationComponent) => {
@@ -477,10 +477,10 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
                       </div>
 
                       <span>{c.plant_name}</span>
-                      <span style={{ color: "#f87171", fontWeight: 600 }}>{formatNumber(c.gross_lost_supply)}</span>
+                      <span style={{ color: "#dc2626", fontWeight: 600 }}>{formatNumber(c.gross_lost_supply)}</span>
                       <span>{formatNumber(c.inventory_quantity)}</span>
 
-                      <span style={{ fontWeight: 700, color: isCritical ? "#f87171" : isWarning ? "#fbbf24" : "#34d399" }}>
+                      <span style={{ fontWeight: 700, color: isCritical ? "#dc2626" : isWarning ? "#d97706" : "#16a34a" }}>
                         {coverage !== null ? `${coverage} days` : "UNKNOWN"}
                       </span>
 
@@ -506,8 +506,8 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
                 <Package size={16} />
               </div>
               <div>
-                <strong>Downstream Products Exposure</strong>
-                <span>{uniqueProducts.length} finished goods impacted</span>
+                <strong>Finished Products Impacted</strong>
+                <span>{uniqueProducts.length} products affected by this supplier</span>
               </div>
             </div>
 
@@ -522,18 +522,18 @@ export default function SupplyChainSimulator({ initialSupplierId }: SupplyChainS
                         <small>{p.product_id}</small>
                       </div>
                       <span className={`status-badge ${isShortage ? "badge-critical" : "badge-buffered"}`}>
-                        {isShortage ? "SHORTAGE" : "BUFFERED"}
+                        {isShortage ? "SHORTAGE" : "PROTECTED"}
                       </span>
                     </div>
 
                     <div className="sc-product-detail">
-                      <span>Dependency:</span>
+                      <span>Needs part:</span>
                       <strong>{p.component_name}</strong>
                     </div>
 
-                    <div className="sc-product-status" style={{ color: isShortage ? "#f87171" : "#34d399" }}>
+                    <div className="sc-product-status" style={{ color: isShortage ? "#dc2626" : "#16a34a" }}>
                       {isShortage ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
-                      <span>{isShortage ? "Direct assembly line risk" : "Protected by component stock"}</span>
+                      <span>{isShortage ? "Assembly line at risk" : "Protected by backup stock"}</span>
                     </div>
                   </div>
                 );

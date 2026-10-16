@@ -55,70 +55,71 @@ export default function OperationalTimeline({
   return (
     <div
       className="detail-card"
-      style={{ marginTop: 16 }}
+      style={{ marginTop: 16, background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 12, padding: "20px" }}
     >
-      <div className="panel-header">
+      <div className="panel-header" style={{ marginBottom: 14 }}>
         <div>
-          <span className="panel-kicker">
-            OPERATIONAL TIMELINE
+          <span className="panel-kicker" style={{ color: "#64748b", fontSize: 11, fontWeight: 700 }}>
+            TIME & RECOVERY ESTIMATE
           </span>
-          <h3>Inventory & Production Outlook</h3>
+          <h3 style={{ color: "#0f172a", fontSize: 16, margin: "2px 0 0" }}>Factory Buffer & Stock Timeline</h3>
         </div>
 
         <div
           style={{
             border: `1px solid ${status.border}`,
             color: status.text,
+            background: `${status.border}15`,
             borderRadius: 999,
-            padding: "6px 10px",
+            padding: "4px 12px",
             fontSize: 11,
             fontWeight: 700,
             letterSpacing: "0.08em",
           }}
         >
-          {productionStatus}
+          {productionStatus === "STOPPED" ? "FACTORY WILL STOP" : productionStatus}
         </div>
       </div>
 
       <div className="result-kpi-grid">
         <div className="result-kpi">
-          <span>MIN BUFFER</span>
-          <strong>{format(summary.minimum_buffer_days, " d")}</strong>
+          <span>MIN STOCK BUFFER</span>
+          <strong>{format(summary.minimum_buffer_days, " Days")}</strong>
         </div>
 
         <div className="result-kpi">
-          <span>FIRST SHORTAGE</span>
+          <span>FIRST DAY OF SHORTAGE</span>
           <strong>
             {summary.first_shortage_day == null
-              ? "--"
-              : format(summary.first_shortage_day, " d")}
+              ? "Day 0"
+              : `Day ${format(summary.first_shortage_day)}`}
           </strong>
         </div>
 
         <div className="result-kpi">
-          <span>FIRST RECOVERY</span>
+          <span>ESTIMATED RECOVERY</span>
           <strong>
             {summary.first_recovery_day == null
               ? "--"
-              : format(summary.first_recovery_day, " d")}
+              : `${format(summary.first_recovery_day)} Days`}
           </strong>
         </div>
 
         <div className="result-kpi">
           <span>NET SHORTAGE</span>
-          <strong>
+          <strong style={{ color: number(summary.net_shortage) > 0 ? "#dc2626" : "#16a34a" }}>
             {number(summary.net_shortage).toLocaleString()}
           </strong>
         </div>
       </div>
 
       {components.length > 0 && (
-        <div style={{ marginTop: 16 }}>
-          <div className="panel-kicker">
-            COMPONENT TIMELINE
+        <div style={{ marginTop: 20 }}>
+          <div className="panel-kicker" style={{ color: "#64748b", fontSize: 11, fontWeight: 700, marginBottom: 8 }}>
+            PARTS RUNOUT TIMELINE
           </div>
 
-          <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+          <div style={{ display: "grid", gap: 10, marginTop: 8 }}>
             {components.map((component: any, index: number) => {
               const componentStatus = String(
                 component.status ?? "UNKNOWN"
@@ -129,10 +130,10 @@ export default function OperationalTimeline({
                 <div
                   key={`${component.component_id}-${component.plant_id}-${index}`}
                   style={{
-                    border: "1px solid rgba(148, 163, 184, 0.16)",
+                    border: "1px solid #e2e8f0",
                     borderRadius: 10,
-                    padding: 12,
-                    background: "rgba(15, 23, 42, 0.28)",
+                    padding: 14,
+                    background: "#f8fafc",
                   }}
                 >
                   <div
@@ -144,19 +145,23 @@ export default function OperationalTimeline({
                     }}
                   >
                     <div>
-                      <strong>
+                      <strong style={{ color: "#0f172a", fontSize: 14 }}>
                         {component.component_name ??
                           component.component_id ??
                           "Unknown component"}
                       </strong>
-                      <div style={{ opacity: 0.65, fontSize: 12, marginTop: 3 }}>
-                        {component.plant_name ?? component.plant_id ?? "Unknown plant"}
+                      <div style={{ color: "#64748b", fontSize: 12, marginTop: 2 }}>
+                        Factory: {component.plant_name ?? component.plant_id ?? "Factory Unit"}
                       </div>
                     </div>
 
                     <span
                       style={{
                         color: colors.text,
+                        background: `${colors.border}15`,
+                        padding: "2px 8px",
+                        borderRadius: 6,
+                        border: `1px solid ${colors.border}40`,
                         fontSize: 11,
                         fontWeight: 700,
                       }}
@@ -170,24 +175,28 @@ export default function OperationalTimeline({
                       display: "grid",
                       gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
                       gap: 8,
-                      marginTop: 10,
+                      marginTop: 12,
+                      background: "#ffffff",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: 8,
+                      padding: "8px 12px",
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: 10, opacity: 0.55 }}>INVENTORY</div>
-                      <strong>{number(component.inventory_units).toLocaleString()}</strong>
+                      <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600 }}>CURRENT STOCK</div>
+                      <strong style={{ color: "#0f172a", fontSize: 13 }}>{number(component.inventory_units).toLocaleString()}</strong>
                     </div>
                     <div>
-                      <div style={{ fontSize: 10, opacity: 0.55 }}>BUFFER</div>
-                      <strong>{format(component.buffer_days, " d")}</strong>
+                      <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600 }}>DAYS RUNWAY</div>
+                      <strong style={{ color: "#d97706", fontSize: 13 }}>{format(component.buffer_days, " d")}</strong>
                     </div>
                     <div>
-                      <div style={{ fontSize: 10, opacity: 0.55 }}>RECOVERY</div>
-                      <strong>{number(component.recovery_units).toLocaleString()}</strong>
+                      <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600 }}>BACKUP RECOVERY</div>
+                      <strong style={{ color: "#16a34a", fontSize: 13 }}>{number(component.recovery_units).toLocaleString()}</strong>
                     </div>
                     <div>
-                      <div style={{ fontSize: 10, opacity: 0.55 }}>RECOVERY ETA</div>
-                      <strong>{format(component.first_recovery_day, " d")}</strong>
+                      <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600 }}>EXPECTED RECOVERY</div>
+                      <strong style={{ color: "#2563eb", fontSize: 13 }}>{format(component.first_recovery_day, " d")}</strong>
                     </div>
                   </div>
                 </div>
@@ -197,26 +206,32 @@ export default function OperationalTimeline({
         </div>
       )}
 
-      <div style={{ marginTop: 16 }}>
-        <div className="panel-kicker">RECOMMENDED ACTIONS</div>
+      <div style={{ marginTop: 20 }}>
+        <div className="panel-kicker" style={{ color: "#64748b", fontSize: 11, fontWeight: 700, marginBottom: 8 }}>
+          SUGGESTED NEXT STEPS
+        </div>
 
-        <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+        <div style={{ display: "grid", gap: 8, marginTop: 8 }}>
           {recommendations.map((item: any, index: number) => (
             <div
               key={index}
               style={{
-                borderLeft: "3px solid rgba(148, 163, 184, 0.45)",
-                padding: "8px 10px",
+                borderLeft: "4px solid #2563eb",
+                background: "#f8fafc",
+                borderRadius: "0 8px 8px 0",
+                padding: "10px 14px",
+                border: "1px solid #e2e8f0",
+                borderLeftWidth: "4px",
               }}
             >
-              <strong style={{ fontSize: 12 }}>
-                {String(item.priority ?? "info").toUpperCase()}
+              <strong style={{ fontSize: 12, color: "#2563eb", textTransform: "uppercase" }}>
+                {String(item.priority ?? "info")}
               </strong>
-              <div style={{ marginTop: 3 }}>
+              <div style={{ marginTop: 2, color: "#0f172a", fontSize: 13, fontWeight: 500 }}>
                 {item.action ?? "Continue monitoring."}
               </div>
               {item.reason && (
-                <div style={{ opacity: 0.58, fontSize: 12, marginTop: 3 }}>
+                <div style={{ color: "#64748b", fontSize: 12, marginTop: 2 }}>
                   {item.reason}
                 </div>
               )}

@@ -40,6 +40,9 @@ from neo4j import GraphDatabase
 class Neo4jService:
     """Central Neo4j service for AtmoGraph."""
 
+    _last_connectivity_check: float = 0.0
+    _cached_connectivity: bool | None = None
+
     def __init__(
         self,
         uri: str | None = None,
@@ -69,29 +72,44 @@ class Neo4jService:
                     self.username,
                     self.password,
                 ),
+                connection_timeout=1.0,
+                max_connection_lifetime=30,
             )
         except Exception as e:
-            print(f"Warning: Could not initialize Neo4j driver: {e}")
             self.driver = None
+            Neo4jService._cached_connectivity = False
 
     # =========================================================
     # CONNECTION
     # =========================================================
 
     def verify_connection(self) -> bool:
-        """Verify that Neo4j is reachable."""
+        """Verify that Neo4j is reachable with fast caching."""
+        if self.driver is None:
+            return False
+
+        import time
+        now = time.time()
+        if Neo4jService._cached_connectivity is not None and (now - Neo4jService._last_connectivity_check) < 20.0:
+            return Neo4jService._cached_connectivity
 
         try:
             self.driver.verify_connectivity()
+            Neo4jService._cached_connectivity = True
+            Neo4jService._last_connectivity_check = now
             return True
-
         except Exception:
+            Neo4jService._cached_connectivity = False
+            Neo4jService._last_connectivity_check = now
             return False
 
     def close(self) -> None:
         """Close Neo4j driver."""
-
-        self.driver.close()
+        if self.driver is not None:
+            try:
+                self.driver.close()
+            except Exception:
+                pass
 
     # =========================================================
     # GENERIC QUERY
@@ -102,9 +120,15 @@ class Neo4jService:
         query: str,
         parameters: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
-        """Execute a Cypher query."""
+        """Execute a Cypher query with fast fail when Neo4j is offline."""
 
         if self.driver is None:
+            return []
+
+        import time
+        now = time.time()
+        # If recently checked as offline, fail fast without waiting 30s socket timeout
+        if Neo4jService._cached_connectivity is False and (now - Neo4jService._last_connectivity_check) < 20.0:
             return []
 
         parameters = parameters or {}
@@ -115,12 +139,15 @@ class Neo4jService:
                     query,
                     parameters,
                 )
+                Neo4jService._cached_connectivity = True
+                Neo4jService._last_connectivity_check = now
                 return [
                     record.data()
                     for record in result
                 ]
         except Exception as e:
-            print(f"Neo4j query error: {e}")
+            Neo4jService._cached_connectivity = False
+            Neo4jService._last_connectivity_check = now
             return []
 
     # =========================================================

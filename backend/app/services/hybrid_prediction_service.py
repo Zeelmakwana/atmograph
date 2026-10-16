@@ -52,8 +52,16 @@ class HybridPredictionService:
         )
 
         # ---------------------------------------------
-        # GNN prediction
+        # GNN prediction (only if Neo4j is online)
         # ---------------------------------------------
+
+        if not self.neo4j.verify_connection():
+            return {
+                "success": True,
+                "overall_risk_score": base_score,
+                "note": "Neo4j graph database offline. Rule-based risk active.",
+                "weights": {"rule_based": 1.0, "gnn": 0.0},
+            }
 
         gnn_result = self.gnn_service.predict(
             graph_id

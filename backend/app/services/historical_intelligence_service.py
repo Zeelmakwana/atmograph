@@ -99,15 +99,19 @@ class HistoricalIntelligenceService:
                 query = query.filter(Event.company_id == cid)
         else:
             from app.models.business_supply_chain import Company
-            active_co = self.db.query(Company).first()
+            active_co = self.db.query(Company).order_by(Company.id.desc()).first()
             if active_co:
                 cname = (active_co.company_name or "").lower()
-                if "adil" in cname or active_co.company_id == "C001":
+                if "adil" in cname:
                     query = query.filter(Event.company_id.in_(["C001", "adilqadri"]))
                 elif "mohilya" in cname:
                     query = query.filter(Event.company_id.in_(["mohilya", "C002"]))
                 elif active_co.company_id:
                     query = query.filter(Event.company_id == active_co.company_id)
+                else:
+                    query = query.filter(Event.id == -1)
+            else:
+                query = query.filter(Event.id == -1)
 
         if search and search.strip():
             pattern = f"%{search.strip()}%"
@@ -157,8 +161,8 @@ class HistoricalIntelligenceService:
     # CLUSTERS
     # ------------------------------------------------------------------
 
-    def clusters(self, limit: int = 100) -> dict[str, Any]:
-        result = self.list_history(limit=limit)
+    def clusters(self, company_id: str = "", limit: int = 100) -> dict[str, Any]:
+        result = self.list_history(company_id=company_id, limit=limit)
 
         return {
             "success": True,

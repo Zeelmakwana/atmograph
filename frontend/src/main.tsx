@@ -32,14 +32,14 @@ class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: "40px", color: "#f87171", fontFamily: "system-ui, sans-serif", background: "#0a0b0e", minHeight: "100vh", boxSizing: "border-box" }}>
-          <div style={{ maxWidth: "800px", margin: "0 auto", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.3)", borderRadius: "12px", padding: "24px" }}>
-            <h2 style={{ color: "#ef4444", margin: "0 0 12px" }}>⚠️ AtmoGraph UI Startup Issue</h2>
-            <p style={{ color: "#e2e8f0", fontSize: "14px", lineHeight: 1.6 }}>
+        <div style={{ padding: "40px", color: "#dc2626", fontFamily: "system-ui, sans-serif", background: "#f8fafc", minHeight: "100vh", boxSizing: "border-box" }}>
+          <div style={{ maxWidth: "800px", margin: "0 auto", background: "#ffffff", border: "1px solid #fecaca", borderRadius: "12px", padding: "24px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)" }}>
+            <h2 style={{ color: "#dc2626", margin: "0 0 12px" }}>Something went wrong</h2>
+            <p style={{ color: "#334155", fontSize: "14px", lineHeight: 1.6 }}>
               {this.state.error?.message || String(this.state.error)}
             </p>
             {this.state.error?.stack && (
-              <pre style={{ background: "#060709", padding: "16px", borderRadius: "8px", overflow: "auto", fontSize: "12px", color: "#fca5a5" }}>
+              <pre style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "16px", borderRadius: "8px", overflow: "auto", fontSize: "12px", color: "#64748b" }}>
                 {this.state.error.stack}
               </pre>
             )}
@@ -54,11 +54,11 @@ class ErrorBoundary extends Component<Props, State> {
                 }}
                 style={{
                   padding: "10px 18px",
-                  background: "#e8a838",
-                  color: "#0a0b0e",
+                  background: "#2563eb",
+                  color: "#ffffff",
                   border: "none",
                   borderRadius: "6px",
-                  fontWeight: 700,
+                  fontWeight: 600,
                   cursor: "pointer",
                 }}
               >
